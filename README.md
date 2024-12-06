@@ -1,135 +1,105 @@
-# KIHAP Backend com tRPC e Vercel
+# KIHAP - Plataforma de Gestão para Academias de Artes Marciais
 
-Este é o backend do projeto KIHAP, implementado usando tRPC e hospedado na Vercel.
+O KIHAP é uma plataforma completa desenvolvida para modernizar e otimizar a gestão de academias de artes marciais. O nome "KIHAP" vem do grito de energia utilizado nas artes marciais coreanas, simbolizando força, determinação e foco - valores que nossa plataforma busca transmitir através de suas soluções tecnológicas.
 
-## Estrutura do Projeto
+## 🎯 Visão Geral
 
-```
-.
-├── api/
-│   └── index.ts           # Endpoints tRPC e configuração do servidor
-├── src/
-│   ├── lib/
-│   │   ├── supabase.ts   # Cliente Supabase
-│   │   └── trpc.ts       # Cliente tRPC
-│   └── types/
-│       └── supabase.ts   # Tipos TypeScript para o banco de dados
-└── vercel.json           # Configuração da Vercel
-```
+A plataforma KIHAP foi criada para atender às necessidades específicas de academias de artes marciais, oferecendo ferramentas para:
 
-## Tecnologias Utilizadas
+- Gestão completa de alunos e turmas
+- Organização e controle de eventos
+- Sistema de graduações e faixas
+- Gestão de conteúdo online
+- CRM e captação de leads
+- Controle financeiro
+- Comunicação entre alunos e instrutores
 
-- **tRPC**: Framework para APIs typesafe
-- **Supabase**: Banco de dados e autenticação
-- **Vercel**: Hospedagem e serverless functions
-- **TypeScript**: Linguagem de programação
-- **Zod**: Validação de schemas
+## 🌟 Principais Funcionalidades
 
-## Endpoints Disponíveis
+### Para Academias
+- **Gestão de Alunos**: Cadastro completo, histórico de graduações, frequência e evolução
+- **Gestão de Turmas**: Controle de horários, presença e planejamento de aulas
+- **CRM**: Sistema completo para gestão de leads e matrículas
+- **Eventos**: Organização e gestão de eventos, competições e graduações
+- **Financeiro**: Controle de mensalidades e pagamentos
 
-### Eventos
+### Para Alunos
+- **Portal do Aluno**: Acesso a informações de treinos e evolução
+- **Conteúdo Online**: Acesso a vídeo-aulas e material didático
+- **Checkin em Eventos**: Participação e acompanhamento de eventos
+- **Comunicação**: Chat direto com instrutores
 
-- `getEvents`: Lista todos os eventos
-- `getEventById`: Busca um evento específico
-- `createEvent`: Cria um novo evento
-- `updateEvent`: Atualiza um evento existente
+### Para Instrutores
+- **Dashboard**: Visão geral das atividades e métricas da academia
+- **Gestão de Conteúdo**: Upload e organização de material didático
+- **Avaliações**: Sistema para registro e acompanhamento do progresso dos alunos
+- **Comunicação**: Sistema de notificações e chat com alunos
 
-### Checkins
+## 🛠 Tecnologias Utilizadas
 
-- `getEventCheckins`: Lista checkins de um evento
-- `createCheckin`: Cria um novo checkin
+- **Frontend**: React, TypeScript, Tailwind CSS
+- **Backend**: tRPC, Node.js
+- **Banco de Dados**: Supabase
+- **Hospedagem**: Vercel
+- **Autenticação**: Supabase Auth
 
-### Estudantes
+## 🚀 Iniciando o Projeto
 
-- `getStudents`: Lista todos os estudantes
-- `getStudentById`: Busca um estudante específico
-
-## Como Usar
-
-1. Configure as variáveis de ambiente:
-
-```env
-SUPABASE_URL=sua_url_do_supabase
-SUPABASE_SERVICE_ROLE_KEY=sua_chave_do_supabase
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/kihap.git
 ```
 
 2. Instale as dependências:
-
 ```bash
 npm install
 ```
 
-3. Execute localmente:
+3. Configure as variáveis de ambiente:
+```env
+VITE_SUPABASE_URL=sua_url_do_supabase
+VITE_SUPABASE_ANON_KEY=sua_chave_do_supabase
+```
 
+4. Execute o projeto:
 ```bash
 npm run dev
 ```
 
-## Exemplos de Uso
+## 📱 Módulos do Sistema
 
-### Frontend (React + tRPC)
+### 🎓 KIHAP Academy
+Módulo dedicado ao ensino e treinamento online, com:
+- Vídeo-aulas
+- Material didático
+- Avaliações online
+- Tracking de progresso
 
-```typescript
-// Exemplo de busca de eventos
-const events = await trpc.getEvents.query();
+### 🎯 KIHAP Events
+Sistema completo para gestão de eventos:
+- Cadastro de participantes
+- Controle de presença
+- Certificados digitais
+- Resultados e rankings
 
-// Exemplo de criação de evento
-const newEvent = await trpc.createEvent.mutate({
-  name: "Evento de Taekwondo",
-  date: new Date().toISOString(),
-  location: "Academia Principal",
-  unit_id: "id-da-unidade"
-});
+### 💼 KIHAP Business
+Ferramentas para gestão do negócio:
+- CRM completo
+- Controle financeiro
+- Relatórios e métricas
+- Marketing digital
 
-// Exemplo de checkin
-const checkin = await trpc.createCheckin.mutate({
-  event_id: "id-do-evento",
-  student_id: "id-do-estudante"
-});
-```
+## 🤝 KIHAP em Ação
+Programa de responsabilidade social que leva artes marciais para comunidades carentes, promovendo:
+- Inclusão social
+- Desenvolvimento pessoal
+- Disciplina e respeito
+- Saúde e bem-estar
 
-## Segurança
+## 📄 Licença
 
-O backend utiliza as políticas de segurança do Supabase para controle de acesso:
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-- Eventos são visíveis para todos os usuários autenticados
-- Apenas instrutores e admin podem criar/editar eventos
-- Alunos podem fazer checkin em eventos
-- Todas as operações requerem autenticação
+---
 
-## Deploy
-
-O deploy é automático através da Vercel. Cada push para a branch principal aciona um novo deploy.
-
-## Desenvolvimento
-
-Para adicionar novos endpoints:
-
-1. Defina os tipos em `src/types/supabase.ts`
-2. Adicione o schema Zod em `api/index.ts`
-3. Implemente o endpoint no router tRPC
-4. Atualize a documentação
-
-## Troubleshooting
-
-### Erros Comuns
-
-1. **Erro de CORS**: Verifique as configurações no `vercel.json`
-2. **Erro de Autenticação**: Confirme as variáveis de ambiente
-3. **Tipo não encontrado**: Verifique se o tipo está definido em `types/supabase.ts`
-
-### Logs
-
-Os logs podem ser visualizados no dashboard da Vercel.
-
-## Contribuindo
-
-1. Faça o fork do projeto
-2. Crie uma branch para sua feature
-3. Faça commit das alterações
-4. Faça push para a branch
-5. Abra um Pull Request
-
-## Licença
-
-Este projeto está sob a licença MIT.
+Desenvolvido com 💪 pela equipe KIHAP
