@@ -6,10 +6,10 @@ import { Student, Lead } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { units, students, leads } = useDataStore();
+  const { units, students, leads, subunits } = useDataStore();
 
   // Calcula o total de subunidades em todas as unidades
-  const totalSubunits = units.reduce((total, unit) => total + (unit.subunits?.length || 0), 0);
+  const totalSubunits = subunits.length;
 
   // Calcula o total de alunos
   const totalStudents = students.length;
@@ -58,46 +58,49 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {units.map((unit) => (
-          <div
-            key={unit.id}
-            onClick={() => navigate(`/dashboard/unit/${unit.id}`)}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{unit.name}</h3>
-                <p className="text-gray-600 dark:text-gray-300">{unit.city}</p>
+        {units.map((unit) => {
+          const unitSubunits = subunits.filter(s => s.unitId === unit.id);
+          return (
+            <div
+              key={unit.id}
+              onClick={() => navigate(`/dashboard/unit/${unit.id}`)}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{unit.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{unit.city}</p>
+                </div>
+                <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 text-xs px-2 py-1 rounded-full">
+                  {unitSubunits.length} subunidades
+                </div>
               </div>
-              <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 text-xs px-2 py-1 rounded-full">
-                {unit.subunits?.length || 0} subunidades
+
+              <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Users size={16} />
+                  <span>
+                    {students.filter(s => s.unitId === unit.id).length} alunos
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <FileText size={16} />
+                  <span>
+                    {students.filter((s: Student) => s.unitId === unit.id && s.status === 'active').length} contratos ativos
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <DollarSign size={16} />
+                  <span>
+                    {leads.filter((l: Lead) => l.unitId === unit.id && l.status === 'novo').length} novos leads
+                  </span>
+                </div>
               </div>
             </div>
-
-            <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
-              <div className="flex items-center gap-2">
-                <Users size={16} />
-                <span>
-                  {students.filter(s => s.unitId === unit.id).length} alunos
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <FileText size={16} />
-                <span>
-                  {students.filter((s: Student) => s.unitId === unit.id && s.status === 'active').length} contratos ativos
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <DollarSign size={16} />
-                <span>
-                  {leads.filter((l: Lead) => l.unitId === unit.id && l.status === 'novo').length} novos leads
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </main>
   );
