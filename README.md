@@ -43,29 +43,6 @@ A plataforma KIHAP foi criada para atender às necessidades específicas de acad
 - **Hospedagem**: Vercel
 - **Autenticação**: Supabase Auth
 
-## 🚀 Iniciando o Projeto
-
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/kihap.git
-```
-
-2. Instale as dependências:
-```bash
-npm install
-```
-
-3. Configure as variáveis de ambiente:
-```env
-VITE_SUPABASE_URL=sua_url_do_supabase
-VITE_SUPABASE_ANON_KEY=sua_chave_do_supabase
-```
-
-4. Execute o projeto:
-```bash
-npm run dev
-```
-
 ## 📱 Módulos do Sistema
 
 ### 🎓 KIHAP Academy
