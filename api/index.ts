@@ -7,6 +7,7 @@ import type {
   KihapEvent,
   EventCheckin,
   Student,
+  Lead,
   CreateEventParams,
   CreateCheckinParams,
   ApiError
@@ -36,8 +37,65 @@ const checkinSchema = z.object({
   student_id: z.string().uuid()
 });
 
+const leadSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+  email: z.string().email('Email inválido'),
+  phone: z.string().min(1, 'Telefone é obrigatório'),
+  source: z.string(),
+  unitId: z.string(),
+  notes: z.string().optional(),
+  value: z.number().optional(),
+  status: z.enum(['novo', 'contato', 'visitou', 'matriculado', 'desistente']).default('novo')
+});
+
 // Rotas da API
 const appRouter = router({
+  // Leads
+  getLeads: publicProcedure.query(async () => {
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data as Lead[];
+  }),
+
+  createLead: publicProcedure
+    .input(leadSchema)
+    .mutation(async ({ input }) => {
+      const { data, error } = await supabase
+        .from('leads')
+        .insert([{
+          ...input,
+          created_at: new Date().toISOString(),
+          history: []
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data as Lead;
+    }),
+
+  updateLead: publicProcedure
+    .input(z.object({
+      id: z.string().uuid(),
+      ...leadSchema.partial().shape
+    }))
+    .mutation(async ({ input }) => {
+      const { id, ...updateData } = input;
+      const { data, error } = await supabase
+        .from('leads')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data as Lead;
+    }),
+
   // Eventos
   getEvents: publicProcedure.query(async () => {
     const { data, error } = await supabase

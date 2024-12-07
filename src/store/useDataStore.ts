@@ -1,6 +1,19 @@
 import { create as createStore } from 'zustand';
-import type { Unit, Student, Lead, User, OnlineContent, Task, SubUnit, KihapEvent, EventCheckin } from '../types';
+import type { 
+  Unit, 
+  Student, 
+  Lead, 
+  User, 
+  OnlineContent, 
+  Task, 
+  SubUnit, 
+  KihapEvent, 
+  EventCheckin,
+  CreateLeadInput,
+  UpdateLeadInput 
+} from '../types/supabase';
 import { initialUnits, initialLeads, initialUsers } from '../data';
+import { trpc } from '../lib/trpc';
 
 interface Message {
   id: string;
@@ -31,9 +44,10 @@ interface DataState {
   updateStudent: (student: Student) => void;
   deleteStudent: (studentId: string) => void;
   
-  addLead: (lead: Omit<Lead, 'id'>) => void;
-  updateLead: (lead: Lead) => void;
+  addLead: (lead: CreateLeadInput) => Promise<void>;
+  updateLead: (lead: UpdateLeadInput) => Promise<void>;
   deleteLead: (leadId: string) => void;
+  fetchLeads: () => Promise<void>;
   
   addUser: (user: Omit<User, 'id'>) => void;
   updateUser: (user: User) => void;
@@ -56,6 +70,17 @@ interface DataState {
   markMessageAsRead: (messageId: string) => void;
 }
 
+// Extrair todas as subunidades das unidades iniciais
+const initialSubunits = initialUnits.reduce((acc: SubUnit[], unit) => {
+  if (unit.subunits) {
+    return [...acc, ...unit.subunits.map(subunit => ({
+      ...subunit,
+      unitId: unit.id
+    }))];
+  }
+  return acc;
+}, []);
+
 export const useDataStore = createStore<DataState>()((set) => ({
   units: initialUnits,
   students: [],
@@ -63,7 +88,7 @@ export const useDataStore = createStore<DataState>()((set) => ({
   users: initialUsers,
   onlineContent: [],
   tasks: [],
-  subunits: [],
+  subunits: initialSubunits,
   kihapEvents: [],
   eventCheckins: [],
   messages: [],
@@ -98,20 +123,44 @@ export const useDataStore = createStore<DataState>()((set) => ({
       students: state.students.filter((s) => s.id !== studentId),
     })),
 
-  addLead: (lead) =>
-    set((state) => ({
-      leads: [...state.leads, { ...lead, id: crypto.randomUUID() }],
-    })),
+  addLead: async (lead) => {
+    try {
+      const newLead = await trpc.createLead.mutate(lead);
+      set((state) => ({
+        leads: [newLead, ...state.leads],
+      }));
+    } catch (error) {
+      console.error('Erro ao adicionar lead:', error);
+      throw error;
+    }
+  },
 
-  updateLead: (lead) =>
-    set((state) => ({
-      leads: state.leads.map((l) => (l.id === lead.id ? lead : l)),
-    })),
+  updateLead: async (lead) => {
+    try {
+      const updatedLead = await trpc.updateLead.mutate(lead);
+      set((state) => ({
+        leads: state.leads.map((l) => (l.id === lead.id ? updatedLead : l)),
+      }));
+    } catch (error) {
+      console.error('Erro ao atualizar lead:', error);
+      throw error;
+    }
+  },
 
   deleteLead: (leadId) =>
     set((state) => ({
       leads: state.leads.filter((l) => l.id !== leadId),
     })),
+
+  fetchLeads: async () => {
+    try {
+      const leads = await trpc.getLeads.query();
+      set({ leads });
+    } catch (error) {
+      console.error('Erro ao buscar leads:', error);
+      throw error;
+    }
+  },
 
   addUser: (user) =>
     set((state) => ({

@@ -199,8 +199,19 @@ export default function CharacterPage() {
       
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
-          <div className="container mx-auto px-4">
+        <section className="relative py-20">
+          {/* Background Image with Overlay */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ 
+              backgroundImage: 'url(https://i.imgur.com/emZOu3Z.jpg)', 
+            }}
+          >
+            {/* Dark Overlay */}
+            <div className="absolute inset-0 bg-black opacity-75"></div>
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 <div className="relative">

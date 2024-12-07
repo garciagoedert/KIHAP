@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { X, Calendar, Phone, Mail, DollarSign, Clock, Plus } from 'lucide-react';
-import { Lead, LeadHistory, LeadStatus } from '../types';
+import { Lead, LeadHistory, LeadStatus } from '../types/supabase';
 import { useDataStore } from '../store/useDataStore';
 
 interface LeadDetailsModalProps {
@@ -16,14 +16,7 @@ const statusLabels: Record<LeadStatus, string> = {
   contato: 'Em Contato',
   visitou: 'Visitou',
   matriculado: 'Matriculado',
-  desistente: 'Desistente',
-  // mantendo os outros status para compatibilidade com o tipo LeadStatus
-  new: 'Novo Lead',
-  contacted: 'Em Contato',
-  interested: 'Interessado',
-  scheduled: 'Agendado',
-  converted: 'Convertido',
-  lost: 'Desistente'
+  desistente: 'Desistente'
 };
 
 const statusColors: Record<LeadStatus, string> = {
@@ -31,18 +24,11 @@ const statusColors: Record<LeadStatus, string> = {
   contato: 'bg-yellow-600',
   visitou: 'bg-purple-600',
   matriculado: 'bg-green-600',
-  desistente: 'bg-red-600',
-  // mantendo os outros status para compatibilidade com o tipo LeadStatus
-  new: 'bg-blue-600',
-  contacted: 'bg-yellow-600',
-  interested: 'bg-purple-600',
-  scheduled: 'bg-indigo-600',
-  converted: 'bg-green-600',
-  lost: 'bg-red-600'
+  desistente: 'bg-red-600'
 };
 
 export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsModalProps) {
-  const { updateLead, addLeadNote, addLeadContact } = useDataStore();
+  const { updateLead } = useDataStore();
   const [note, setNote] = useState('');
   const [contact, setContact] = useState('');
   const [nextContactDate, setNextContactDate] = useState('');
@@ -51,14 +37,38 @@ export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsM
 
   const handleSaveNote = () => {
     if (note.trim()) {
-      addLeadNote(lead.id, note, userId);
+      const newHistoryItem: LeadHistory = {
+        id: crypto.randomUUID(),
+        leadId: lead.id,
+        status: lead.status,
+        notes: note,
+        createdAt: new Date().toISOString(),
+        type: 'note'
+      };
+
+      updateLead({
+        ...lead,
+        history: [...(lead.history || []), newHistoryItem]
+      });
       setNote('');
     }
   };
 
   const handleSaveContact = () => {
     if (contact.trim()) {
-      addLeadContact(lead.id, contact, nextContactDate || undefined, userId);
+      const newHistoryItem: LeadHistory = {
+        id: crypto.randomUUID(),
+        leadId: lead.id,
+        status: lead.status,
+        notes: contact,
+        createdAt: new Date().toISOString(),
+        type: 'contact'
+      };
+
+      updateLead({
+        ...lead,
+        history: [...(lead.history || []), newHistoryItem]
+      });
       setContact('');
       setNextContactDate('');
     }
@@ -74,11 +84,11 @@ export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsM
       case 'status_change':
         return `Status alterado de ${statusLabels[item.oldStatus!]} para ${statusLabels[item.newStatus!]}`;
       case 'note':
-        return `Nota: ${item.description}`;
+        return `Nota: ${item.notes}`;
       case 'contact':
-        return `Contato: ${item.description}`;
+        return `Contato: ${item.notes}`;
       default:
-        return item.description;
+        return item.notes;
     }
   };
 

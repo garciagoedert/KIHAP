@@ -2,25 +2,17 @@ import React, { useState } from 'react';
 import { useDataStore } from '../store/useDataStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
-import { Lead, LeadStatus, LeadHistory } from '../types';
+import { Lead, LeadStatus, LeadHistory } from '../types/supabase';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { FiSearch, FiTrash2, FiPhone, FiMail, FiMessageSquare, FiUsers, FiEdit } from 'react-icons/fi';
 import LeadDetailsModal from './LeadDetailsModal';
-
-// ... (mantenha as constantes statusLabels e getStatusColors inalteradas)
 
 const statusLabels: Record<LeadStatus, string> = {
   'novo': 'Novo',
   'contato': 'Contatado',
   'visitou': 'Visitou',
   'matriculado': 'Matriculado',
-  'desistente': 'Desistente',
-  'new': 'Novo',
-  'contacted': 'Contatado',
-  'interested': 'Interessado',
-  'scheduled': 'Agendado',
-  'converted': 'Convertido',
-  'lost': 'Perdido'
+  'desistente': 'Desistente'
 };
 
 const getStatusColors = (isDarkMode: boolean): Record<LeadStatus, string> => ({
@@ -37,24 +29,6 @@ const getStatusColors = (isDarkMode: boolean): Record<LeadStatus, string> => ({
     ? 'bg-gradient-to-br from-green-900 to-green-800 text-green-100 border-green-700'
     : 'bg-gradient-to-br from-green-50 to-green-100 text-green-800 border-green-200',
   'desistente': isDarkMode
-    ? 'bg-gradient-to-br from-red-900 to-red-800 text-red-100 border-red-700'
-    : 'bg-gradient-to-br from-red-50 to-red-100 text-red-800 border-red-200',
-  'new': isDarkMode
-    ? 'bg-gradient-to-br from-blue-900 to-blue-800 text-blue-100 border-blue-700'
-    : 'bg-gradient-to-br from-blue-50 to-blue-100 text-blue-800 border-blue-200',
-  'contacted': isDarkMode
-    ? 'bg-gradient-to-br from-yellow-900 to-yellow-800 text-yellow-100 border-yellow-700'
-    : 'bg-gradient-to-br from-yellow-50 to-yellow-100 text-yellow-800 border-yellow-200',
-  'interested': isDarkMode
-    ? 'bg-gradient-to-br from-purple-900 to-purple-800 text-purple-100 border-purple-700'
-    : 'bg-gradient-to-br from-purple-50 to-purple-100 text-purple-800 border-purple-200',
-  'scheduled': isDarkMode
-    ? 'bg-gradient-to-br from-indigo-900 to-indigo-800 text-indigo-100 border-indigo-700'
-    : 'bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-800 border-indigo-200',
-  'converted': isDarkMode
-    ? 'bg-gradient-to-br from-green-900 to-green-800 text-green-100 border-green-700'
-    : 'bg-gradient-to-br from-green-50 to-green-100 text-green-800 border-green-200',
-  'lost': isDarkMode
     ? 'bg-gradient-to-br from-red-900 to-red-800 text-red-100 border-red-700'
     : 'bg-gradient-to-br from-red-50 to-red-100 text-red-800 border-red-200'
 });
