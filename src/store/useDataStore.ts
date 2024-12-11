@@ -9,10 +9,14 @@ import type {
   SubUnit, 
   KihapEvent, 
   EventCheckin,
+  Badge,
+  StudentBadge
+} from '../types';
+import type {
   CreateLeadInput,
-  UpdateLeadInput 
+  UpdateLeadInput
 } from '../types/supabase';
-import { initialUnits, initialLeads, initialUsers } from '../data';
+import { initialUnits, initialUsers, beltBadges } from '../data';
 import { trpc } from '../lib/trpc';
 
 interface Message {
@@ -35,6 +39,8 @@ interface DataState {
   kihapEvents: KihapEvent[];
   eventCheckins: EventCheckin[];
   messages: Message[];
+  badges: Badge[];
+  studentBadges: StudentBadge[];
   
   addUnit: (unit: Omit<Unit, 'id'>) => void;
   updateUnit: (unit: Unit) => void;
@@ -68,6 +74,13 @@ interface DataState {
 
   sendMessage: (message: Omit<Message, 'id'>) => void;
   markMessageAsRead: (messageId: string) => void;
+
+  addBadge: (badge: Omit<Badge, 'id'>) => void;
+  updateBadge: (badge: Badge) => void;
+  deleteBadge: (badgeId: string) => void;
+
+  awardBadge: (studentBadge: Omit<StudentBadge, 'id'>) => void;
+  removeBadge: (studentBadgeId: string) => void;
 }
 
 // Extrair todas as subunidades das unidades iniciais
@@ -84,7 +97,7 @@ const initialSubunits = initialUnits.reduce((acc: SubUnit[], unit) => {
 export const useDataStore = createStore<DataState>()((set) => ({
   units: initialUnits,
   students: [],
-  leads: initialLeads,
+  leads: [], // Inicializa vazio, será preenchido pelo fetchLeads
   users: initialUsers,
   onlineContent: [],
   tasks: [],
@@ -92,6 +105,8 @@ export const useDataStore = createStore<DataState>()((set) => ({
   kihapEvents: [],
   eventCheckins: [],
   messages: [],
+  badges: beltBadges,
+  studentBadges: [],
 
   addUnit: (unit) =>
     set((state) => ({
@@ -129,6 +144,9 @@ export const useDataStore = createStore<DataState>()((set) => ({
       set((state) => ({
         leads: [newLead, ...state.leads],
       }));
+      // Busca todos os leads após adicionar um novo para garantir sincronização
+      const leads = await trpc.getLeads.query();
+      set({ leads });
     } catch (error) {
       console.error('Erro ao adicionar lead:', error);
       throw error;
@@ -141,6 +159,9 @@ export const useDataStore = createStore<DataState>()((set) => ({
       set((state) => ({
         leads: state.leads.map((l) => (l.id === lead.id ? updatedLead : l)),
       }));
+      // Busca todos os leads após atualizar para garantir sincronização
+      const leads = await trpc.getLeads.query();
+      set({ leads });
     } catch (error) {
       console.error('Erro ao atualizar lead:', error);
       throw error;
@@ -241,5 +262,30 @@ export const useDataStore = createStore<DataState>()((set) => ({
       messages: state.messages.map((m) =>
         m.id === messageId ? { ...m, read: true } : m
       ),
+    })),
+
+  addBadge: (badge) =>
+    set((state) => ({
+      badges: [...state.badges, { ...badge, id: crypto.randomUUID() }],
+    })),
+
+  updateBadge: (badge) =>
+    set((state) => ({
+      badges: state.badges.map((b) => (b.id === badge.id ? badge : b)),
+    })),
+
+  deleteBadge: (badgeId) =>
+    set((state) => ({
+      badges: state.badges.filter((b) => b.id !== badgeId),
+    })),
+
+  awardBadge: (studentBadge) =>
+    set((state) => ({
+      studentBadges: [...state.studentBadges, { ...studentBadge, id: crypto.randomUUID() }],
+    })),
+
+  removeBadge: (studentBadgeId) =>
+    set((state) => ({
+      studentBadges: state.studentBadges.filter((sb) => sb.id !== studentBadgeId),
     })),
 }));

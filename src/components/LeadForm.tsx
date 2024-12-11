@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Lead } from '../types';
 import { useDataStore } from '../store/useDataStore';
+import { CreateLeadInput } from '../types/supabase';
 
 interface LeadFormProps {
-  onSubmit: (lead: Omit<Lead, 'id' | 'status' | 'createdAt' | 'history'>) => void;
+  onSubmit: (lead: CreateLeadInput) => Promise<void>;
   buttonText?: string;
   darkMode?: boolean;
 }
 
 export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experimental", darkMode = false }: LeadFormProps) {
   const { units } = useDataStore();
-  const [formData, setFormData] = useState<Omit<Lead, 'id' | 'status' | 'createdAt' | 'history'>>({
+  const [formData, setFormData] = useState<CreateLeadInput>({
     name: '',
     email: '',
     phone: '',
@@ -19,10 +19,26 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
     notes: '',
     value: 0
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Validações
+    if (!formData.name || !formData.email || !formData.phone || !formData.unitId) {
+      alert('Por favor, preencha todos os campos obrigatórios');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await onSubmit(formData);
+    } catch (error) {
+      console.error('Erro ao enviar formulário:', error);
+      alert('Erro ao enviar formulário. Por favor, tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputClasses = darkMode 
@@ -47,6 +63,7 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
           className={inputClasses}
           required
           placeholder="Seu nome completo"
+          disabled={isSubmitting}
         />
       </div>
 
@@ -62,6 +79,7 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
           className={inputClasses}
           required
           placeholder="seu@email.com"
+          disabled={isSubmitting}
         />
       </div>
 
@@ -77,6 +95,7 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
           className={inputClasses}
           required
           placeholder="(00) 00000-0000"
+          disabled={isSubmitting}
         />
       </div>
 
@@ -90,6 +109,7 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
           onChange={(e) => setFormData({ ...formData, unitId: e.target.value })}
           className={inputClasses}
           required
+          disabled={isSubmitting}
         >
           <option value="">Selecione uma unidade</option>
           {units.map((unit) => (
@@ -111,15 +131,19 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
           className={inputClasses}
           rows={3}
           placeholder="Sua mensagem aqui"
+          disabled={isSubmitting}
         />
       </div>
 
       <div className="pt-4">
         <button
           type="submit"
-          className="w-full px-4 py-2 bg-[#dfa129] text-white rounded-md hover:bg-opacity-90 transition-colors"
+          className={`w-full px-4 py-2 bg-[#dfa129] text-white rounded-md hover:bg-opacity-90 transition-colors ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          disabled={isSubmitting}
         >
-          {buttonText}
+          {isSubmitting ? 'Enviando...' : buttonText}
         </button>
       </div>
     </form>

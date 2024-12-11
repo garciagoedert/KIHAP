@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useDataStore } from '../store/useDataStore';
 import { useAuthStore } from '../store/useAuthStore';
 import StudentForm from './StudentForm';
@@ -160,11 +160,18 @@ export default function UnitDashboard() {
               const activeSubunitStudents = subunitStudents.filter(s => s.active);
               
               return (
-                <div key={subunit.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <Link
+                  key={subunit.id}
+                  to={`/dashboard/unit/${unitId}/subunit/${subunit.id}`}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                >
                   <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">{subunit.name}</h4>
                   <p className="text-gray-600 dark:text-gray-300 mb-2">Alunos Ativos: {activeSubunitStudents.length}</p>
                   <p className="text-gray-600 dark:text-gray-300">Total de Alunos: {subunitStudents.length}</p>
-                </div>
+                  <div className="mt-4 text-[#1d528d] dark:text-blue-400 text-sm font-medium">
+                    Ver dashboard →
+                  </div>
+                </Link>
               );
             })}
           </div>

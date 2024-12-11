@@ -2,7 +2,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Student } from '../types';
-import { Save, X, User, Upload, FileDown, Bell } from 'lucide-react';
+import { Save, X, User, Upload, FileDown, Bell, Trash2 } from 'lucide-react';
 import CertificateGenerator from './CertificateGenerator';
 import NotificationForm from './NotificationForm';
 import PaymentLinkGenerator from './PaymentLinkGenerator';
@@ -13,14 +13,16 @@ interface StudentFormProps {
   student?: Student | null;
   onSubmit: (student: Partial<Student>) => void;
   onClose: () => void;
+  onDelete?: (studentId: string) => void;
 }
 
-export default function StudentForm({ student, onSubmit, onClose }: StudentFormProps) {
+export default function StudentForm({ student, onSubmit, onClose, onDelete }: StudentFormProps) {
   const { units } = useDataStore();
   const isDarkMode = useThemeStore(state => state.isDarkMode);
   const [showCertificateGenerator, setShowCertificateGenerator] = useState(false);
   const [showNotificationForm, setShowNotificationForm] = useState(false);
   const [showPaymentLink, setShowPaymentLink] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState({
     name: student?.name || '',
     email: student?.email || '',
@@ -135,10 +137,17 @@ export default function StudentForm({ student, onSubmit, onClose }: StudentFormP
     }));
   };
 
+  const handleDelete = () => {
+    if (student && onDelete) {
+      onDelete(student.id);
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto`}>
-        <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 border-b z-10`}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative`}>
+        <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 border-b`} style={{ zIndex: 1 }}>
           <div className="flex items-center justify-between">
             <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
               {student ? 'Editar Aluno' : 'Novo Aluno'}
@@ -170,6 +179,17 @@ export default function StudentForm({ student, onSubmit, onClose }: StudentFormP
                 <FileDown size={16} />
                 <span>Gerar Certificado</span>
               </button>
+              {student && (
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex items-center space-x-2 px-4 py-2 border border-red-500 text-red-500 hover:bg-red-50 rounded-md shadow-sm text-sm font-medium"
+                  title="Excluir aluno"
+                >
+                  <Trash2 size={16} />
+                  <span>Excluir</span>
+                </button>
+              )}
               <button
                 onClick={onClose}
                 className={`${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`}
@@ -183,6 +203,8 @@ export default function StudentForm({ student, onSubmit, onClose }: StudentFormP
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          {/* ... Resto do formulário permanece igual ... */}
+          {/* Copie todo o conteúdo do formulário aqui */}
           {error && (
             <div className={`${isDarkMode ? 'bg-red-900/50 text-red-200' : 'bg-red-50 text-red-600'} p-4 rounded-md`}>
               {error}
@@ -550,6 +572,38 @@ export default function StudentForm({ student, onSubmit, onClose }: StudentFormP
             student={student}
             onClose={() => setShowPaymentLink(false)}
           />
+        )}
+
+        {/* Modal de confirmação de exclusão */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
+            <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 max-w-sm w-full`}>
+              <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+                Confirmar Exclusão
+              </h3>
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>
+                Tem certeza que deseja excluir este aluno?
+              </p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className={`px-4 py-2 ${
+                    isDarkMode
+                      ? 'text-gray-300 hover:text-gray-100'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

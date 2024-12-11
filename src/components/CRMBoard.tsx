@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDataStore } from '../store/useDataStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
@@ -36,15 +36,23 @@ const getStatusColors = (isDarkMode: boolean): Record<LeadStatus, string> => ({
 const kanbanStatuses: LeadStatus[] = ['novo', 'contato', 'visitou', 'matriculado', 'desistente'];
 
 export default function CRMBoard() {
-  const { leads, updateLead, deleteLead } = useDataStore();
+  const { leads, updateLead, deleteLead, fetchLeads } = useDataStore();
   const { user } = useAuthStore();
   const isDarkMode = useThemeStore(state => state.isDarkMode);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Busca os leads quando o componente é montado
+  useEffect(() => {
+    console.log('Buscando leads...');
+    fetchLeads().catch(error => {
+      console.error('Erro ao buscar leads:', error);
+    });
+  }, []); // Dependência vazia para executar apenas na montagem
+
   const statusColors = getStatusColors(isDarkMode);
 
-  const handleDragEnd = (result: DropResult) => {
+  const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || !user) return;
 
     const { draggableId, source, destination } = result;
@@ -65,13 +73,25 @@ export default function CRMBoard() {
         newStatus,
       };
 
-      updateLead({ ...lead, status: newStatus, history: [...(lead.history || []), newHistoryItem] });
+      try {
+        await updateLead({ ...lead, status: newStatus, history: [...(lead.history || []), newHistoryItem] });
+      } catch (error) {
+        console.error('Erro ao atualizar lead:', error);
+        alert('Erro ao atualizar o status do lead. Por favor, tente novamente.');
+      }
     }
   };
 
-  const handleDeleteLead = (leadId: string) => {
+  const handleDeleteLead = async (leadId: string) => {
     if (window.confirm('Tem certeza que deseja excluir este lead?')) {
-      deleteLead(leadId);
+      try {
+        await deleteLead(leadId);
+        // Atualiza a lista após deletar
+        await fetchLeads();
+      } catch (error) {
+        console.error('Erro ao deletar lead:', error);
+        alert('Erro ao excluir o lead. Por favor, tente novamente.');
+      }
     }
   };
 

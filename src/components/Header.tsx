@@ -19,37 +19,56 @@ export default function Header() {
     navigate('/');
   };
 
+  const handleSubmenuToggle = (submenu: 'CRM' | 'Administração' | 'Eventos KIHAP') => {
+    setIsCRMSubmenuOpen(submenu === 'CRM' ? !isCRMSubmenuOpen : false);
+    setIsAdminSubmenuOpen(submenu === 'Administração' ? !isAdminSubmenuOpen : false);
+    setIsEventsSubmenuOpen(submenu === 'Eventos KIHAP' ? !isEventsSubmenuOpen : false);
+  };
+
+  const getSubmenuState = (label: string) => {
+    switch (label) {
+      case 'CRM':
+        return isCRMSubmenuOpen;
+      case 'Administração':
+        return isAdminSubmenuOpen;
+      case 'Eventos KIHAP':
+        return isEventsSubmenuOpen;
+      default:
+        return false;
+    }
+  };
+
   const menuItems = [
     {
       label: 'Dashboard',
       path: '/dashboard',
-      icon: <Home size={20} />
+      icon: <Home size={24} />
     },
     {
       label: 'Meu Perfil',
       path: '/dashboard/profile',
-      icon: <UserCircle size={20} />
+      icon: <UserCircle size={24} />
     },
     ...(user?.role === 'admin' ? [
       {
         label: 'Administração',
         path: '/dashboard/admin',
-        icon: <Shield size={20} />,
+        icon: <Shield size={24} />,
         submenu: [
           { 
             label: 'Usuários',
             path: '/dashboard/users/manage',
-            icon: <Users size={20} />
+            icon: <Users size={24} />
           },
           {
             label: 'Unidades',
             path: '/dashboard/units/manage',
-            icon: <Building2 size={20} />
+            icon: <Building2 size={24} />
           },
           {
             label: 'Grade de Horários',
             path: '/dashboard/schedule',
-            icon: <BookOpen size={20} />
+            icon: <BookOpen size={24} />
           }
         ]
       }
@@ -58,32 +77,32 @@ export default function Header() {
       {
         label: 'Tatame Online',
         path: '/dashboard/online',
-        icon: <Video size={20} />
+        icon: <Video size={24} />
       },
       {
         label: 'Badges',
         path: '/dashboard/badges',
-        icon: <Award size={20} />
+        icon: <Award size={24} />
       },
       {
         label: 'KIHAP STORE',
         path: '/dashboard/store',
-        icon: <ShoppingBag size={20} />
+        icon: <ShoppingBag size={24} />
       },
       {
         label: 'Eventos KIHAP',
         path: '/dashboard/events',
-        icon: <Calendar size={20} />,
+        icon: <Calendar size={24} />,
         submenu: [
           {
             label: 'Gerenciar Eventos',
             path: '/dashboard/events/manage',
-            icon: <Calendar size={20} />
+            icon: <Calendar size={24} />
           },
           {
             label: 'Checkins',
             path: '/dashboard/events/checkins',
-            icon: <CheckSquare size={20} />
+            icon: <CheckSquare size={24} />
           }
         ]
       }
@@ -92,12 +111,12 @@ export default function Header() {
       {
         label: 'CRM',
         path: '/dashboard/crm',
-        icon: <BarChart3 size={20} />,
+        icon: <BarChart3 size={24} />,
         submenu: [
           {
             label: 'Mensagens',
             path: '/dashboard/messages',
-            icon: <MessageSquare size={20} />
+            icon: <MessageSquare size={24} />
           }
         ]
       }
@@ -105,7 +124,7 @@ export default function Header() {
     {
       label: 'Tarefas',
       path: '/dashboard/tasks',
-      icon: <CheckSquare size={20} />
+      icon: <CheckSquare size={24} />
     }
   ];
 
@@ -123,135 +142,145 @@ export default function Header() {
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+            className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             aria-label="Menu"
+            data-state={isMenuOpen ? "open" : "closed"}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <div className="relative w-6 h-6">
+              <div className={`absolute transition-all duration-300 ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`}>
+                <Menu size={24} />
+              </div>
+              <div className={`absolute transition-all duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'}`}>
+                <X size={24} />
+              </div>
+            </div>
           </button>
         </div>
 
         <div 
-          className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ${
-            isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          className={`fixed inset-0 bg-black transition-all duration-500 ease-in-out z-[90] ${
+            isMenuOpen ? 'bg-opacity-50 pointer-events-auto' : 'bg-opacity-0 pointer-events-none'
           }`}
           onClick={() => setIsMenuOpen(false)}
+          aria-hidden="true"
         />
 
         <div 
-          className={`fixed right-0 top-0 h-full w-64 bg-[#1a2c54] dark:bg-gray-900 transform transition-transform duration-300 ease-in-out ${
+          id="mobile-menu"
+          className={`fixed right-0 top-0 h-full w-[280px] bg-[#1a2c54] shadow-xl transform transition-all duration-500 ease-in-out z-[110] ${
             isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu de navegação"
         >
           <div className="p-4 border-b border-gray-700 flex justify-end">
             <button
               onClick={() => setIsMenuOpen(false)}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors duration-300"
               title="Fechar Menu"
+              aria-label="Fechar Menu"
             >
               <X size={24} />
             </button>
           </div>
 
-          <nav className="p-4">
-            <div className="space-y-1">
-              {menuItems.map((item, index) => (
-                <div key={index}>
-                  {item.submenu ? (
-                    <div className="mb-2">
-                      <div className="flex items-center gap-3 px-3 py-3 text-white hover:bg-gray-700 rounded-md transition-colors">
-                        <Link
-                          to={item.path}
-                          className="flex-1 flex items-center gap-3"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {item.icon}
-                          <span className="font-medium">{item.label}</span>
-                        </Link>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (item.label === 'CRM') {
-                              setIsCRMSubmenuOpen(!isCRMSubmenuOpen);
-                            } else if (item.label === 'Administração') {
-                              setIsAdminSubmenuOpen(!isAdminSubmenuOpen);
-                            } else if (item.label === 'Eventos KIHAP') {
-                              setIsEventsSubmenuOpen(!isEventsSubmenuOpen);
-                            }
-                          }}
-                          className="p-2 hover:bg-gray-600 rounded-full transition-colors"
-                          title={`Expandir submenu ${item.label}`}
-                          aria-label={`Expandir submenu ${item.label}`}
-                        >
-                          <ChevronDown 
-                            size={16} 
-                            className="transition-transform transform duration-200" 
-                            style={{ 
-                              transform: (
-                                (item.label === 'CRM' && isCRMSubmenuOpen) || 
-                                (item.label === 'Administração' && isAdminSubmenuOpen) ||
-                                (item.label === 'Eventos KIHAP' && isEventsSubmenuOpen)
-                              ) ? 'rotate(180deg)' : 'rotate(0deg)' 
-                            }} 
-                          />
-                        </button>
-                      </div>
-                      {((item.label === 'CRM' && isCRMSubmenuOpen) || 
-                        (item.label === 'Administração' && isAdminSubmenuOpen) ||
-                        (item.label === 'Eventos KIHAP' && isEventsSubmenuOpen)) && (
-                        <div className="mt-1 ml-4 border-l-2 border-gray-700">
-                          {item.submenu.map((subitem, subindex) => (
-                            <Link
-                              key={subindex}
-                              to={subitem.path}
-                              className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors"
-                              onClick={() => setIsMenuOpen(false)}
-                            >
-                              {subitem.icon}
-                              <span>{subitem.label}</span>
-                            </Link>
-                          ))}
+          <nav className="flex flex-col h-[calc(100%-80px)]" aria-label="Menu principal">
+            <div className="flex-1 overflow-y-auto py-4">
+              <div className="space-y-2 px-4">
+                {menuItems.map((item, index) => (
+                  <div key={index} className="mb-2">
+                    {item.submenu ? (
+                      <div>
+                        <div className="flex items-center gap-3 px-4 py-3 text-white hover:bg-gray-700 rounded-lg transition-all duration-300">
+                          <Link
+                            to={item.path}
+                            className="flex-1 flex items-center gap-3"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            {item.icon}
+                            <span className="font-medium text-lg">{item.label}</span>
+                          </Link>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleSubmenuToggle(item.label as any);
+                            }}
+                            className="p-2 hover:bg-gray-600 rounded-full transition-all duration-300"
+                            title={`Expandir submenu ${item.label}`}
+                            aria-label={`Expandir submenu ${item.label}`}
+                            data-state={getSubmenuState(item.label) ? "open" : "closed"}
+                          >
+                            <ChevronDown 
+                              size={20} 
+                              className="transition-transform duration-300" 
+                              style={{ 
+                                transform: getSubmenuState(item.label) ? 'rotate(180deg)' : 'rotate(0deg)' 
+                              }} 
+                            />
+                          </button>
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <Link
-                      to={item.path}
-                      className="flex items-center gap-3 px-3 py-3 text-white hover:bg-gray-700 rounded-md transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {item.icon}
-                      <span className="font-medium">{item.label}</span>
-                    </Link>
-                  )}
-                </div>
-              ))}
+                        <div 
+                          className={`overflow-hidden transition-all duration-300 ${
+                            getSubmenuState(item.label) ? 'mt-2' : 'mt-0'
+                          }`}
+                          style={{
+                            height: getSubmenuState(item.label) ? `${item.submenu.length * 60}px` : '0px'
+                          }}
+                        >
+                          <div className="pl-4 border-l-2 border-gray-700">
+                            {item.submenu.map((subitem: any, subindex: number) => (
+                              <Link
+                                key={subindex}
+                                to={subitem.path}
+                                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-all duration-300 mb-1"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                {subitem.icon}
+                                <span className="text-base">{subitem.label}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <Link
+                        to={item.path}
+                        className="flex items-center gap-3 px-4 py-3 text-white hover:bg-gray-700 rounded-lg transition-all duration-300"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {item.icon}
+                        <span className="font-medium text-lg">{item.label}</span>
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-auto p-4 border-t border-gray-700">
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-gray-700 rounded-lg transition-all duration-300 mb-4"
+              >
+                {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+                <span className="font-medium text-lg">
+                  {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-gray-700 rounded-lg transition-all duration-300"
+              >
+                <LogOut size={24} />
+                <span className="font-medium text-lg">Sair</span>
+              </button>
             </div>
           </nav>
-
-          <div className="absolute bottom-20 left-0 right-0 p-4 border-t border-gray-700">
-            <button
-              onClick={toggleTheme}
-              className="flex items-center gap-3 w-full px-3 py-3 text-white hover:bg-gray-700 rounded-md transition-colors"
-            >
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-              <span className="font-medium">
-                {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
-              </span>
-            </button>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
-            <button
-              onClick={() => {
-                handleLogout();
-                setIsMenuOpen(false);
-              }}
-              className="flex items-center gap-3 w-full px-3 py-3 text-white hover:bg-gray-700 rounded-md transition-colors"
-            >
-              <LogOut size={20} />
-              <span className="font-medium">Sair</span>
-            </button>
-          </div>
         </div>
       </div>
     </header>

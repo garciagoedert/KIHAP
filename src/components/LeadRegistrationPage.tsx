@@ -5,7 +5,7 @@ import Footer from './Footer';
 import LeadForm from './LeadForm';
 import { MapPin } from 'lucide-react';
 import { useDataStore } from '../store/useDataStore';
-import { Lead } from '../types';
+import { CreateLeadInput } from '../types/supabase';
 
 const cities = [
   {
@@ -59,15 +59,23 @@ export default function LeadRegistrationPage() {
   const { pathname } = useLocation();
   const { addLead } = useDataStore();
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  const handleSubmit = (formData: Omit<Lead, 'id' | 'status' | 'createdAt' | 'history'>) => {
-    addLead(formData);
-    setSubmitted(true);
-    window.scrollTo(0, 0);
+  const handleSubmit = async (formData: CreateLeadInput) => {
+    try {
+      setError(null);
+      await addLead(formData);
+      setSubmitted(true);
+      window.scrollTo(0, 0);
+    } catch (err) {
+      console.error('Erro ao adicionar lead:', err);
+      setError('Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.');
+      throw err; // Re-throw para que o LeadForm possa lidar com o estado de submissão
+    }
   };
 
   if (submitted) {
@@ -143,6 +151,11 @@ export default function LeadRegistrationPage() {
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">
                     Agende sua Experiência
                   </h2>
+                  {error && (
+                    <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                      {error}
+                    </div>
+                  )}
                   <LeadForm onSubmit={handleSubmit} />
                 </div>
               </div>

@@ -68,33 +68,25 @@ export const initialStores: Store[] = [
     id: '1',
     name: 'KIHAP STORE Florianópolis',
     city: 'Florianópolis',
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    unitId: '1'
   },
   {
     id: '2',
     name: 'KIHAP STORE Dourados',
     city: 'Dourados (Jardim América)',
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    unitId: '2'
   },
   {
     id: '3',
     name: 'KIHAP STORE Brasília',
     city: 'Brasília',
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    unitId: '3'
   },
   {
     id: '4',
     name: 'KIHAP STORE Online',
     city: 'Online',
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    unitId: '1'
   }
 ];
 
@@ -106,11 +98,9 @@ export const initialProducts: Product[] = [
     price: 299.90,
     image: 'https://placehold.co/400x400/white/black?text=Dobok+Kihap',
     category: 'Uniformes',
-    storeId: '4', // Online
+    storeId: '4',
     stock: 50,
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    active: true
   },
   {
     id: '2',
@@ -119,11 +109,9 @@ export const initialProducts: Product[] = [
     price: 89.90,
     image: 'https://placehold.co/400x400/black/white?text=Faixa+Preta',
     category: 'Faixas',
-    storeId: '4', // Online
+    storeId: '4',
     stock: 30,
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    active: true
   }
 ];
 
@@ -134,8 +122,6 @@ export const initialUnits: Unit[] = [
     city: 'Florianópolis',
     address: 'Rua Principal, 123',
     phone: '(48) 99999-9999',
-    email: 'floripa@kihap.com.br',
-    active: true,
     subunits: [
       {
         id: '1-1',
@@ -143,10 +129,8 @@ export const initialUnits: Unit[] = [
         address: 'Rua Santa Mônica, 100',
         phone: '(48) 99999-9991',
         email: 'santamonica@kihap.com.br',
-        active: true,
-        parentUnitId: '1',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        unitId: '1',
+        parentUnitId: '1'
       },
       {
         id: '1-2',
@@ -154,10 +138,8 @@ export const initialUnits: Unit[] = [
         address: 'Rua do Centro, 200',
         phone: '(48) 99999-9992',
         email: 'centro@kihap.com.br',
-        active: true,
-        parentUnitId: '1',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        unitId: '1',
+        parentUnitId: '1'
       },
       {
         id: '1-3',
@@ -165,14 +147,10 @@ export const initialUnits: Unit[] = [
         address: 'Rua dos Coqueiros, 300',
         phone: '(48) 99999-9993',
         email: 'coqueiros@kihap.com.br',
-        active: true,
-        parentUnitId: '1',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        unitId: '1',
+        parentUnitId: '1'
       }
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    ]
   },
   {
     id: '2',
@@ -180,8 +158,6 @@ export const initialUnits: Unit[] = [
     city: 'Dourados',
     address: 'Jardim América, 456',
     phone: '(67) 99999-9999',
-    email: 'dourados@kihap.com.br',
-    active: true,
     subunits: [
       {
         id: '2-1',
@@ -189,14 +165,10 @@ export const initialUnits: Unit[] = [
         address: 'Rua Jardim América, 100',
         phone: '(67) 99999-9991',
         email: 'jardimamerica@kihap.com.br',
-        active: true,
-        parentUnitId: '2',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        unitId: '2',
+        parentUnitId: '2'
       }
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    ]
   },
   {
     id: '3',
@@ -204,8 +176,6 @@ export const initialUnits: Unit[] = [
     city: 'Brasília',
     address: 'Setor Central, 789',
     phone: '(61) 99999-9999',
-    email: 'brasilia@kihap.com.br',
-    active: true,
     subunits: [
       {
         id: '3-1',
@@ -213,10 +183,8 @@ export const initialUnits: Unit[] = [
         address: 'Asa Sul, 100',
         phone: '(61) 99999-9991',
         email: 'asasul@kihap.com.br',
-        active: true,
-        parentUnitId: '3',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        unitId: '3',
+        parentUnitId: '3'
       },
       {
         id: '3-2',
@@ -224,10 +192,8 @@ export const initialUnits: Unit[] = [
         address: 'Lago Sul, 200',
         phone: '(61) 99999-9992',
         email: 'lagosul@kihap.com.br',
-        active: true,
-        parentUnitId: '3',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        unitId: '3',
+        parentUnitId: '3'
       },
       {
         id: '3-3',
@@ -235,10 +201,8 @@ export const initialUnits: Unit[] = [
         address: 'Sudoeste, 300',
         phone: '(61) 99999-9993',
         email: 'sudoeste@kihap.com.br',
-        active: true,
-        parentUnitId: '3',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        unitId: '3',
+        parentUnitId: '3'
       },
       {
         id: '3-4',
@@ -246,14 +210,28 @@ export const initialUnits: Unit[] = [
         address: 'Pontos de ensino, 400',
         phone: '(61) 99999-9994',
         email: 'pontosensino@kihap.com.br',
-        active: true,
-        parentUnitId: '3',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        unitId: '3',
+        parentUnitId: '3'
+      },
+      {
+        id: '3-5',
+        name: 'Jardim Botânico',
+        address: 'Jardim Botânico, 500',
+        phone: '(61) 99999-9995',
+        email: 'jardimbotanico@kihap.com.br',
+        unitId: '3',
+        parentUnitId: '3'
+      },
+      {
+        id: '3-6',
+        name: 'Noroeste',
+        address: 'Noroeste, 600',
+        phone: '(61) 99999-9996',
+        email: 'noroeste@kihap.com.br',
+        unitId: '3',
+        parentUnitId: '3'
       }
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    ]
   }
 ];
 
@@ -265,9 +243,7 @@ export const initialUsers: User[] = [
     password: 'admin123',
     role: 'admin',
     unitId: '1',
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    active: true
   }
 ];
 
@@ -276,167 +252,140 @@ export const beltBadges: Badge[] = [
     id: '1',
     name: 'Faixa Branca',
     description: 'Conquistou a graduação de faixa branca',
-    image: 'white-belt.png',
+    imageUrl: 'white-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'branca',
     color: 'bg-white text-gray-800',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   },
   {
     id: '2',
     name: 'Faixa Amarela',
     description: 'Conquistou a graduação de faixa amarela',
-    image: 'yellow-belt.png',
+    imageUrl: 'yellow-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'amarela',
     color: 'bg-yellow-100 text-yellow-800',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   },
   {
     id: '3',
     name: 'Faixa Laranja',
     description: 'Conquistou a graduação de faixa laranja',
-    image: 'orange-belt.png',
+    imageUrl: 'orange-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'laranja',
     color: 'bg-orange-100 text-orange-800',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   },
   {
     id: '4',
     name: 'Faixa Verde',
     description: 'Conquistou a graduação de faixa verde',
-    image: 'green-belt.png',
+    imageUrl: 'green-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'verde',
     color: 'bg-green-100 text-green-800',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   },
   {
     id: '5',
     name: 'Faixa Azul',
     description: 'Conquistou a graduação de faixa azul',
-    image: 'blue-belt.png',
+    imageUrl: 'blue-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'azul',
     color: 'bg-blue-100 text-blue-800',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   },
   {
     id: '6',
     name: 'Faixa Roxa',
     description: 'Conquistou a graduação de faixa roxa',
-    image: 'purple-belt.png',
+    imageUrl: 'purple-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'roxa',
     color: 'bg-purple-100 text-purple-800',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   },
   {
     id: '7',
     name: 'Faixa Vermelha',
     description: 'Conquistou a graduação de faixa vermelha',
-    image: 'red-belt.png',
+    imageUrl: 'red-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'vermelha',
     color: 'bg-red-100 text-red-800',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   },
   {
     id: '8',
     name: 'Faixa Marrom',
     description: 'Conquistou a graduação de faixa marrom',
-    image: 'brown-belt.png',
+    imageUrl: 'brown-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'marrom',
     color: 'bg-[#D7CCC8] text-[#795548]',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   },
   {
     id: '9',
     name: 'Faixa Preta',
     description: 'Conquistou a graduação de faixa preta',
-    image: 'black-belt.png',
+    imageUrl: 'black-belt.png',
     criteria: '0 alunos conquistaram',
-    active: true,
     category: 'belt',
     type: 'belt',
     beltLevel: 'preta',
     color: 'bg-gray-100 text-black',
-    icon: 'Award',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    icon: 'Award'
   }
 ];
 
 export const initialOnlineContent: OnlineContent[] = [
   {
-    id: '1',
+    id: 1,
     title: 'Poomsae Taegeuk Il Jang',
     description: 'Aprenda o primeiro Poomsae do Taekwondo',
+    videoUrl: 'https://example.com/video1.mp4',
+    duration: 30,
+    category: 'technique',
+    level: 'beginner',
     type: 'video',
-    url: 'https://example.com/video1.mp4',
-    active: true,
     isPublished: true,
     thumbnailUrl: 'https://placehold.co/400x225/1d528d/white?text=Poomsae+1',
-    category: 'technique',
     tags: ['poomsae', 'básico', 'faixa branca'],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString()
   },
   {
-    id: '2',
+    id: 2,
     title: 'Teoria do Taekwondo',
     description: 'História e filosofia do Taekwondo',
+    videoUrl: 'https://example.com/video2.mp4',
+    duration: 45,
+    category: 'theory',
+    level: 'beginner',
     type: 'video',
-    url: 'https://example.com/video2.mp4',
-    active: true,
     isPublished: true,
     thumbnailUrl: 'https://placehold.co/400x225/1d528d/white?text=Teoria',
-    category: 'theory',
     tags: ['teoria', 'história', 'filosofia'],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -445,19 +394,11 @@ export const initialLiveClasses: LiveClass[] = [
     id: '1',
     title: 'Treino ao Vivo - Faixas Coloridas',
     description: 'Treino online para todas as faixas coloridas',
-    type: 'live',
     instructorId: '1',
-    startTime: new Date(),
-    endTime: new Date(),
-    url: 'https://meet.google.com/example',
-    active: true,
-    status: 'scheduled',
+    startTime: new Date().toISOString(),
     duration: 60,
-    scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Amanhã
-    thumbnailUrl: 'https://placehold.co/400x225/1d528d/white?text=Aula+Ao+Vivo',
-    category: 'class',
-    tags: ['treino', 'faixas coloridas'],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    maxParticipants: 30,
+    status: 'scheduled',
+    scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
   }
 ];
