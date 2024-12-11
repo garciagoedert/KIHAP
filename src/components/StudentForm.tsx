@@ -145,8 +145,8 @@ export default function StudentForm({ student, onSubmit, onClose, onDelete }: St
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
-      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative`}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-20" style={{ zIndex: 9999 }}>
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-y-auto relative mb-20`}>
         <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 border-b`} style={{ zIndex: 1 }}>
           <div className="flex items-center justify-between">
             <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
@@ -203,8 +203,6 @@ export default function StudentForm({ student, onSubmit, onClose, onDelete }: St
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
-          {/* ... Resto do formulário permanece igual ... */}
-          {/* Copie todo o conteúdo do formulário aqui */}
           {error && (
             <div className={`${isDarkMode ? 'bg-red-900/50 text-red-200' : 'bg-red-50 text-red-600'} p-4 rounded-md`}>
               {error}
