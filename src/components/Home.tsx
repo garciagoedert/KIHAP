@@ -129,26 +129,34 @@ export default function Home() {
         </section>
 
         {/* Programs Section */}
-        <section className="py-16 md:py-20 bg-gray-50">
+        <section className="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-gray-100">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-8 md:mb-12">Nossos Programas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-12">
+              Nossos Programas
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10 max-w-7xl mx-auto">
               {programs.map((program, index) => (
                 <ScrollToTopLink
                   key={index}
                   to={program.path}
-                  className="group bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                  className="group relative bg-white rounded-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl"
                 >
-                  <div className="aspect-w-16 aspect-h-9 relative">
+                  <div className="relative h-56 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
                     <img 
                       src={program.image}
                       alt={program.name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">{program.name}</h3>
-                    <p className="text-gray-600">{program.description}</p>
+                  <div className="p-6 bg-white relative">
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/0 to-white/100 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <h3 className="text-xl font-bold text-gray-800 mb-3 relative z-10 group-hover:text-[#dfa129] transition-colors duration-300">
+                      {program.name}
+                    </h3>
+                    <p className="text-gray-600 relative z-10 group-hover:text-gray-800 transition-colors duration-300 leading-relaxed">
+                      {program.description}
+                    </p>
                   </div>
                 </ScrollToTopLink>
               ))}
