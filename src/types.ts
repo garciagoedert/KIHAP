@@ -57,6 +57,7 @@ export interface Unit {
   city?: string;
   state?: string;
   subunits?: SubUnit[];
+  type?: 'physical' | 'online';
 }
 
 export interface SubUnit {
@@ -69,7 +70,7 @@ export interface SubUnit {
   email?: string;
 }
 
-export type LeadStatus = 'new' | 'contacted' | 'interested' | 'scheduled' | 'converted' | 'lost' | 'novo' | 'contato' | 'visitou' | 'matriculado' | 'desistente';
+export type LeadStatus = 'novo' | 'contato' | 'visitou' | 'matriculado' | 'desistente';
 
 export interface Lead {
   id: string;
@@ -89,9 +90,9 @@ export interface LeadHistory {
   id: string;
   leadId: string;
   status: LeadStatus;
-  notes?: string;
+  notes: string;
   createdAt: string;
-  type?: string;
+  type: 'status_change' | 'note' | 'contact';
   oldStatus?: LeadStatus;
   newStatus?: LeadStatus;
   description?: string;

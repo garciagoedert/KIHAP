@@ -3,18 +3,13 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import MainHeader from './MainHeader';
 import Footer from './Footer';
 
-interface Instructor {
-  name: string;
-  role: string;
-  photo: string;
-}
-
 interface Location {
   name: string;
   address: string;
   phone: string;
   maps: string;
   slug?: string;
+  photo: string;
 }
 
 interface LocationData {
@@ -25,8 +20,9 @@ interface LocationData {
   address?: string;
   phone?: string;
   maps?: string;
+  photo?: string;
   locations?: Location[];
-  instructors: Instructor[];
+  features?: string[];
 }
 
 const locationData: Record<string, LocationData> = {
@@ -40,43 +36,40 @@ const locationData: Record<string, LocationData> = {
         address: 'SHIS QI 11 Bloco O, Sala 108, Lago Sul',
         phone: '(61) 99999-9999',
         maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3839.5389324841837!2d-47.8821246!3d-15.7989873!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTXCsDQ3JzU2LjQiUyA0N8KwNTInNTUuNiJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
-        slug: 'lago-sul'
+        slug: 'lago-sul',
+        photo: 'https://images.pexels.com/photos/3622613/pexels-photo-3622613.jpeg'
       },
       {
         name: 'Asa Sul',
         address: 'SGAS 915, Bloco C, Sala 201, Asa Sul',
         phone: '(61) 99999-9998',
         maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3839.5389324841837!2d-47.8821246!3d-15.7989873!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTXCsDQ3JzU2LjQiUyA0N8KwNTInNTUuNiJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
-        slug: 'asa-sul'
+        slug: 'asa-sul',
+        photo: 'https://images.pexels.com/photos/3622615/pexels-photo-3622615.jpeg'
       },
       {
         name: 'Sudoeste',
         address: 'CLSW 300, Bloco B, Loja 164, Sudoeste',
         phone: '(61) 99999-9997',
         maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3839.5389324841837!2d-47.8821246!3d-15.7989873!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTXCsDQ3JzU2LjQiUyA0N8KwNTInNTUuNiJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
-        slug: 'sudoeste'
-      }
-    ],
-    instructors: [
-      {
-        name: 'Mestre João Silva',
-        role: 'Instrutor Principal',
-        photo: 'https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=300&h=300&fit=crop'
+        slug: 'sudoeste',
+        photo: 'https://images.pexels.com/photos/3622614/pexels-photo-3622614.jpeg'
       },
       {
-        name: 'Professor Pedro Santos',
-        role: 'Instrutor Asa Sul',
-        photo: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=300&h=300&fit=crop'
+        name: 'Jardim Botânico',
+        address: 'Av. das Paineiras, Quadra 3, Lote 5, Jardim Botânico',
+        phone: '(61) 99999-9996',
+        maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3839.5389324841837!2d-47.8821246!3d-15.7989873!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTXCsDQ3JzU2LjQiUyA0N8KwNTInNTUuNiJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
+        slug: 'jardim-botanico',
+        photo: 'https://images.pexels.com/photos/3622619/pexels-photo-3622619.jpeg'
       },
       {
-        name: 'Professora Maria Silva',
-        role: 'Instrutora Lago Sul',
-        photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300&h=300&fit=crop'
-      },
-      {
-        name: 'Professor André Oliveira',
-        role: 'Instrutor Sudoeste',
-        photo: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?q=80&w=300&h=300&fit=crop'
+        name: 'Noroeste',
+        address: 'CLNW 10/11, Bloco A, Loja 3, Noroeste',
+        phone: '(61) 99999-9995',
+        maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3839.5389324841837!2d-47.8821246!3d-15.7989873!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTXCsDQ3JzU2LjQiUyA0N8KwNTInNTUuNiJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
+        slug: 'noroeste',
+        photo: 'https://images.pexels.com/photos/3622621/pexels-photo-3622621.jpeg'
       }
     ]
   },
@@ -90,38 +83,24 @@ const locationData: Record<string, LocationData> = {
         address: 'Rua Felipe Schmidt, 515, Centro',
         phone: '(48) 99999-9999',
         maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3535.9789184906876!2d-48.5494156!3d-27.5969136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjfCsDM1JzQ4LjkiUyA0OMKwMzInNTcuOSJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
-        slug: 'centro-floripa'
+        slug: 'centro-floripa',
+        photo: 'https://images.pexels.com/photos/3622625/pexels-photo-3622625.jpeg'
       },
       {
         name: 'Santa Mônica',
         address: 'Rua João Pio Duarte Silva, 404, Santa Mônica',
         phone: '(48) 99999-9998',
         maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3535.9789184906876!2d-48.5494156!3d-27.5969136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjfCsDM1JzQ4LjkiUyA0OMKwMzInNTcuOSJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
-        slug: 'santa-monica'
+        slug: 'santa-monica',
+        photo: 'https://images.pexels.com/photos/3622626/pexels-photo-3622626.jpeg'
       },
       {
         name: 'Coqueiros',
         address: 'Rua Desembargador Pedro Silva, 2958, Coqueiros',
         phone: '(48) 99999-9997',
         maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3535.9789184906876!2d-48.5494156!3d-27.5969136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjfCsDM1JzQ4LjkiUyA0OMKwMzInNTcuOSJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
-        slug: 'coqueiros'
-      }
-    ],
-    instructors: [
-      {
-        name: 'Mestre Carlos Santos',
-        role: 'Instrutor Principal',
-        photo: 'https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=300&h=300&fit=crop'
-      },
-      {
-        name: 'Professor Ricardo Lima',
-        role: 'Instrutor Centro',
-        photo: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=300&h=300&fit=crop'
-      },
-      {
-        name: 'Professora Ana Costa',
-        role: 'Instrutora Santa Mônica',
-        photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300&h=300&fit=crop'
+        slug: 'coqueiros',
+        photo: 'https://images.pexels.com/photos/3622627/pexels-photo-3622627.jpeg'
       }
     ]
   },
@@ -132,34 +111,18 @@ const locationData: Record<string, LocationData> = {
     address: 'Rua Principal, 123, Centro',
     phone: '(67) 99999-9999',
     maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3736.987456321098!2d-54.8067891!3d-22.2234567!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDEzJzI0LjQiUyA1NMKwNDgnMjQuNCJX!5e0!3m2!1spt-BR!2sbr!4v1629899012345!5m2!1spt-BR!2sbr',
-    instructors: [
-      {
-        name: 'Mestre Paulo Oliveira',
-        role: 'Instrutor Principal',
-        photo: 'https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=300&h=300&fit=crop'
-      },
-      {
-        name: 'Professor Lucas Souza',
-        role: 'Instrutor',
-        photo: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=300&h=300&fit=crop'
-      }
-    ]
+    photo: 'https://images.pexels.com/photos/3622630/pexels-photo-3622630.jpeg'
   },
   online: {
-    name: 'Unidade Online',
+    name: 'Tatame Online',
     heroImage: 'https://kihap.com.br/wp-content/uploads/2021/12/kihap-mulheres.png',
-    description: 'Treine de onde estiver com nossos instrutores experientes',
-    instructors: [
-      {
-        name: 'Mestre Roberto Silva',
-        role: 'Instrutor Principal',
-        photo: 'https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=300&h=300&fit=crop'
-      },
-      {
-        name: 'Professora Carla Santos',
-        role: 'Instrutora',
-        photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300&h=300&fit=crop'
-      }
+    description: 'Treine de onde estiver com nossos instrutores experientes através de nossa plataforma exclusiva.',
+    features: [
+      'Aulas ao vivo e gravadas',
+      'Acompanhamento personalizado',
+      'Flexibilidade de horários',
+      'Acesso a conteúdo exclusivo',
+      'Comunidade online ativa'
     ]
   }
 };
@@ -210,107 +173,113 @@ export default function LocationLanding() {
         {/* Location Info */}
         <section className="py-20">
           <div className="container mx-auto px-4">
-            {(location === 'florianopolis' || location === 'brasilia') && data.locations ? (
-              <div className="space-y-12">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6">Nossas Unidades em {data.name}</h2>
-                {data.locations.map((loc: Location, index: number) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-12 py-8 border-b border-gray-200 last:border-0">
-                    <div>
-                      <Link 
-                        to={`/subunidade/${loc.slug}`}
-                        className="inline-block hover:text-[#dfa129] transition-colors"
-                      >
-                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Unidade {loc.name}</h3>
-                      </Link>
-                      <div className="space-y-4 text-gray-600">
-                        <p><strong>Endereço:</strong> {loc.address}</p>
-                        <p><strong>Telefone:</strong> {loc.phone}</p>
+            <div className="space-y-12">
+              {(location === 'florianopolis' || location === 'brasilia') && data.locations ? (
+                <>
+                  <h2 className="text-3xl font-bold text-gray-800 mb-6">Nossas Unidades em {data.name}</h2>
+                  {data.locations.map((loc: Location, index: number) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-12 py-8 border-b border-gray-200 last:border-0">
+                      <div>
                         <Link 
                           to={`/subunidade/${loc.slug}`}
-                          className="inline-block mt-4 text-[#dfa129] hover:text-opacity-80 transition-colors"
+                          className="inline-block hover:text-[#dfa129] transition-colors"
                         >
-                          Ver mais detalhes →
+                          <h3 className="text-2xl font-bold text-gray-800 mb-4">Unidade {loc.name}</h3>
                         </Link>
+                        <div className="space-y-4 text-gray-600">
+                          <p><strong>Endereço:</strong> {loc.address}</p>
+                          <p><strong>Telefone:</strong> {loc.phone}</p>
+                          <Link 
+                            to={`/subunidade/${loc.slug}`}
+                            className="inline-block mt-4 text-[#dfa129] hover:text-opacity-80 transition-colors"
+                          >
+                            Ver mais detalhes →
+                          </Link>
+                        </div>
+                        {/* Foto da Fachada */}
+                        <div className="mt-6">
+                          <img 
+                            src={loc.photo} 
+                            alt={`Fachada da unidade ${loc.name}`}
+                            className="w-full h-48 object-cover rounded-lg shadow-md"
+                          />
+                        </div>
+                      </div>
+                      {loc.maps && (
+                        <div className="h-[300px] rounded-lg overflow-hidden">
+                          <iframe
+                            src={loc.maps}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title={`Mapa da unidade ${loc.name}`}
+                          ></iframe>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <div className="max-w-3xl mx-auto text-center">
+                    <h2 className="text-3xl font-bold text-gray-800 mb-6">Tatame Online</h2>
+                    <div className="space-y-6 text-gray-600">
+                      <p className="text-lg">{data.description}</p>
+                      
+                      {location === 'online' && data.features && (
+                        <div className="mt-8">
+                          <h3 className="text-xl font-semibold text-gray-800 mb-4">Benefícios do Tatame Online</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                            {data.features.map((feature: string, index: number) => (
+                              <div 
+                                key={index}
+                                className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center space-x-3"
+                              >
+                                <div className="flex-shrink-0">
+                                  <div className="w-2 h-2 bg-[#dfa129] rounded-full"></div>
+                                </div>
+                                <p className="text-gray-700">{feature}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="mt-8">
+                        <a
+                          href="#contact"
+                          className="inline-block bg-[#dfa129] text-white px-8 py-3 rounded-md text-lg font-medium hover:bg-opacity-90 transition-colors"
+                        >
+                          Comece Agora
+                        </a>
                       </div>
                     </div>
-                    {loc.maps && (
-                      <div className="h-[300px] rounded-lg overflow-hidden">
-                        <iframe
-                          src={loc.maps}
-                          width="100%"
-                          height="100%"
-                          style={{ border: 0 }}
-                          allowFullScreen
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                          title={`Mapa da unidade ${loc.name}`}
-                        ></iframe>
-                      </div>
-                    )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-800 mb-6">Informações da Unidade</h2>
-                  <div className="space-y-4 text-gray-600">
-                    {data.address && <p><strong>Endereço:</strong> {data.address}</p>}
-                    {data.phone && <p><strong>Telefone:</strong> {data.phone}</p>}
-                    {data.description && <p>{data.description}</p>}
-                    {location === 'dourados' && (
-                      <Link 
-                        to="/subunidade/dourados"
-                        className="inline-block mt-4 text-[#dfa129] hover:text-opacity-80 transition-colors"
-                      >
-                        Ver mais detalhes →
-                      </Link>
-                    )}
-                  </div>
-                </div>
-                {data.maps && (
-                  <div className="h-[400px] rounded-lg overflow-hidden">
-                    <iframe
-                      src={data.maps}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title={`Mapa da unidade ${data.name}`}
-                    ></iframe>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Team Section */}
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Nossa Equipe</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {data.instructors.map((instructor: Instructor, index: number) => (
-                <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                  <img 
-                    src={instructor.photo}
-                    alt={instructor.name}
-                    className="w-full h-64 object-cover"
-                  />
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">{instructor.name}</h3>
-                    <p className="text-gray-600">{instructor.role}</p>
-                  </div>
-                </div>
-              ))}
+                  {data.maps && (
+                    <div className="h-[400px] rounded-lg overflow-hidden mt-8">
+                      <iframe
+                        src={data.maps}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title={`Mapa da unidade ${data.name}`}
+                      ></iframe>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </section>
 
         {/* Contact Form */}
-        <section id="contact" className="py-20">
+        <section id="contact" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Agende sua Experiência</h2>

@@ -10,13 +10,16 @@ import type {
   KihapEvent, 
   EventCheckin,
   Badge,
-  StudentBadge
+  StudentBadge,
+  LiveClass,
+  Notification,
+  PhysicalTest
 } from '../types';
 import type {
   CreateLeadInput,
   UpdateLeadInput
 } from '../types/supabase';
-import { initialUnits, initialUsers, beltBadges } from '../data';
+import { initialUnits, initialUsers, beltBadges, initialOnlineContent, initialLiveClasses, initialStudents } from '../data';
 import { trpc } from '../lib/trpc';
 
 interface Message {
@@ -41,6 +44,13 @@ interface DataState {
   messages: Message[];
   badges: Badge[];
   studentBadges: StudentBadge[];
+  liveClasses: LiveClass[];
+  notifications: Notification[];
+  physicalTests: PhysicalTest[];
+
+  addPhysicalTest: (test: Omit<PhysicalTest, 'id'>) => void;
+  updatePhysicalTest: (test: PhysicalTest) => void;
+  deletePhysicalTest: (testId: string) => void;
   
   addUnit: (unit: Omit<Unit, 'id'>) => void;
   updateUnit: (unit: Unit) => void;
@@ -96,10 +106,10 @@ const initialSubunits = initialUnits.reduce((acc: SubUnit[], unit) => {
 
 export const useDataStore = createStore<DataState>()((set) => ({
   units: initialUnits,
-  students: [],
+  students: initialStudents || [],
   leads: [], // Inicializa vazio, será preenchido pelo fetchLeads
-  users: initialUsers,
-  onlineContent: [],
+  users: initialUsers || [],
+  onlineContent: initialOnlineContent,
   tasks: [],
   subunits: initialSubunits,
   kihapEvents: [],
@@ -107,6 +117,24 @@ export const useDataStore = createStore<DataState>()((set) => ({
   messages: [],
   badges: beltBadges,
   studentBadges: [],
+  liveClasses: initialLiveClasses,
+  notifications: [],
+  physicalTests: [],
+
+  addPhysicalTest: (test) =>
+    set((state) => ({
+      physicalTests: [...state.physicalTests, { ...test, id: crypto.randomUUID() }],
+    })),
+
+  updatePhysicalTest: (test) =>
+    set((state) => ({
+      physicalTests: state.physicalTests.map((t) => (t.id === test.id ? test : t)),
+    })),
+
+  deletePhysicalTest: (testId) =>
+    set((state) => ({
+      physicalTests: state.physicalTests.filter((t) => t.id !== testId),
+    })),
 
   addUnit: (unit) =>
     set((state) => ({
@@ -139,47 +167,53 @@ export const useDataStore = createStore<DataState>()((set) => ({
     })),
 
   addLead: async (lead) => {
-    try {
-      const newLead = await trpc.createLead.mutate(lead);
-      set((state) => ({
-        leads: [newLead, ...state.leads],
-      }));
-      // Busca todos os leads após adicionar um novo para garantir sincronização
-      const leads = await trpc.getLeads.query();
-      set({ leads });
-    } catch (error) {
-      console.error('Erro ao adicionar lead:', error);
-      throw error;
-    }
+    const newLead: Lead = {
+      ...lead,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      history: [],
+      status: lead.status || 'novo'
+    };
+    
+    set((state) => {
+      const newLeads = [newLead, ...state.leads];
+      // Salva no localStorage
+      localStorage.setItem('kihap_leads', JSON.stringify(newLeads));
+      return { leads: newLeads };
+    });
   },
 
   updateLead: async (lead) => {
-    try {
-      const updatedLead = await trpc.updateLead.mutate(lead);
-      set((state) => ({
-        leads: state.leads.map((l) => (l.id === lead.id ? updatedLead : l)),
-      }));
-      // Busca todos os leads após atualizar para garantir sincronização
-      const leads = await trpc.getLeads.query();
-      set({ leads });
-    } catch (error) {
-      console.error('Erro ao atualizar lead:', error);
-      throw error;
-    }
+    set((state) => {
+      const currentLead = state.leads.find(l => l.id === lead.id);
+      if (!currentLead) return state;
+
+      const updatedLead: Lead = {
+        ...currentLead,
+        ...lead,
+        history: lead.history || currentLead.history
+      };
+
+      const updatedLeads = state.leads.map((l) => l.id === lead.id ? updatedLead : l);
+      // Salva no localStorage
+      localStorage.setItem('kihap_leads', JSON.stringify(updatedLeads));
+      return { leads: updatedLeads };
+    });
   },
 
   deleteLead: (leadId) =>
-    set((state) => ({
-      leads: state.leads.filter((l) => l.id !== leadId),
-    })),
+    set((state) => {
+      const filteredLeads = state.leads.filter((l) => l.id !== leadId);
+      // Salva no localStorage
+      localStorage.setItem('kihap_leads', JSON.stringify(filteredLeads));
+      return { leads: filteredLeads };
+    }),
 
   fetchLeads: async () => {
-    try {
-      const leads = await trpc.getLeads.query();
-      set({ leads });
-    } catch (error) {
-      console.error('Erro ao buscar leads:', error);
-      throw error;
+    // Carrega do localStorage
+    const savedLeads = localStorage.getItem('kihap_leads');
+    if (savedLeads) {
+      set({ leads: JSON.parse(savedLeads) });
     }
   },
 

@@ -15,8 +15,8 @@ interface PhysicalTestFormProps {
 function PhysicalTestForm({ test, student, onClose, onSubmit }: PhysicalTestFormProps) {
   const [formData, setFormData] = useState({
     date: test?.date || format(new Date(), 'yyyy-MM-dd'),
-    belt: test?.belt || student.belt,
-    totalScore: test?.totalScore || 0,
+    type: test?.type || 'avaliação',
+    result: test?.result || 0,
     notes: test?.notes || ''
   });
 
@@ -39,6 +39,8 @@ function PhysicalTestForm({ test, student, onClose, onSubmit }: PhysicalTestForm
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"
+              title="Fechar"
+              aria-label="Fechar formulário"
             >
               <X size={24} />
             </button>
@@ -57,34 +59,44 @@ function PhysicalTestForm({ test, student, onClose, onSubmit }: PhysicalTestForm
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1d528d] focus:ring-1 focus:ring-[#1d528d]"
                 required
+                title="Data do teste"
+                aria-label="Data do teste"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Faixa
+                Tipo
               </label>
-              <input
-                type="text"
-                value={formData.belt}
-                onChange={(e) => setFormData({ ...formData, belt: e.target.value })}
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1d528d] focus:ring-1 focus:ring-[#1d528d]"
                 required
-              />
+                title="Tipo do teste"
+                aria-label="Tipo do teste"
+              >
+                <option value="avaliação">Avaliação</option>
+                <option value="treino">Treino</option>
+                <option value="competição">Competição</option>
+              </select>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Pontuação Total
+              Resultado
             </label>
             <input
               type="number"
-              value={formData.totalScore}
-              onChange={(e) => setFormData({ ...formData, totalScore: parseInt(e.target.value) })}
+              value={formData.result}
+              onChange={(e) => setFormData({ ...formData, result: parseInt(e.target.value) })}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1d528d] focus:ring-1 focus:ring-[#1d528d]"
               min="0"
               required
+              title="Resultado do teste"
+              aria-label="Resultado do teste"
+              placeholder="Digite o resultado"
             />
           </div>
 
@@ -98,6 +110,8 @@ function PhysicalTestForm({ test, student, onClose, onSubmit }: PhysicalTestForm
               rows={3}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1d528d] focus:ring-1 focus:ring-[#1d528d]"
               placeholder="Adicione observações sobre o teste..."
+              title="Observações do teste"
+              aria-label="Observações do teste"
             />
           </div>
 
@@ -129,14 +143,14 @@ interface PhysicalTestsProps {
 export default function PhysicalTests({ student }: PhysicalTestsProps) {
   const { physicalTests, addPhysicalTest, updatePhysicalTest, deletePhysicalTest } = useDataStore();
   const [showForm, setShowForm] = useState(false);
-  const [editingTest, setEditingTest] = useState<PhysicalTest | null>(null);
+  const [editingTest, setEditingTest] = useState<PhysicalTest | undefined>(undefined);
 
   // Get tests for this student
   const studentTests = physicalTests
     .filter(test => test.studentId === student.id)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const handleDelete = (testId: number) => {
+  const handleDelete = (testId: string) => {
     if (window.confirm('Tem certeza que deseja excluir este teste?')) {
       deletePhysicalTest(testId);
     }
@@ -149,10 +163,12 @@ export default function PhysicalTests({ student }: PhysicalTestsProps) {
           <h2 className="text-xl font-bold text-gray-800">Testes Físicos</h2>
           <button
             onClick={() => {
-              setEditingTest(null);
+              setEditingTest(undefined);
               setShowForm(true);
             }}
             className="flex items-center gap-2 bg-[#1d528d] text-white px-4 py-2 rounded-md hover:bg-[#164070] transition-colors"
+            title="Adicionar novo teste"
+            aria-label="Adicionar novo teste"
           >
             <Plus size={20} />
             Novo Teste
@@ -170,11 +186,11 @@ export default function PhysicalTests({ student }: PhysicalTestsProps) {
                         {format(new Date(test.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                       </h3>
                       <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                        {test.belt}
+                        {test.type}
                       </span>
                     </div>
                     <p className="text-2xl font-bold text-[#1d528d] mb-2">
-                      {test.totalScore} pontos
+                      {test.result} pontos
                     </p>
                     {test.notes && (
                       <p className="text-gray-600 text-sm">{test.notes}</p>
@@ -187,12 +203,16 @@ export default function PhysicalTests({ student }: PhysicalTestsProps) {
                         setShowForm(true);
                       }}
                       className="p-2 text-gray-400 hover:text-[#1d528d] transition-colors"
+                      title="Editar teste"
+                      aria-label="Editar teste"
                     >
                       <Edit2 size={18} />
                     </button>
                     <button
                       onClick={() => handleDelete(test.id)}
                       className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      title="Excluir teste"
+                      aria-label="Excluir teste"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -233,7 +253,7 @@ export default function PhysicalTests({ student }: PhysicalTestsProps) {
             student={student}
             onClose={() => {
               setShowForm(false);
-              setEditingTest(null);
+              setEditingTest(undefined);
             }}
             onSubmit={(testData) => {
               if (editingTest) {
@@ -242,7 +262,7 @@ export default function PhysicalTests({ student }: PhysicalTestsProps) {
                 addPhysicalTest(testData);
               }
               setShowForm(false);
-              setEditingTest(null);
+              setEditingTest(undefined);
             }}
           />
         )}

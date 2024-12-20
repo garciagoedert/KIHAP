@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaInstagram, FaFacebook, FaTiktok } from 'react-icons/fa';
+import { FaInstagram, FaFacebook, FaTiktok, FaYoutube } from 'react-icons/fa';
 
 export default function Footer() {
   return (
@@ -42,6 +42,14 @@ export default function Footer() {
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <FaTiktok className="text-2xl" />
+              </a>
+              <a 
+                href="https://www.youtube.com/@kihapoficial" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <FaYoutube className="text-2xl" />
               </a>
             </div>
           </div>

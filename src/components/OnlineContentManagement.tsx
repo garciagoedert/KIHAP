@@ -167,8 +167,215 @@ export default function OnlineContentManagement() {
           </div>
         </div>
 
-        {/* ... (mantenha o resto do código do componente) ... */}
+        {/* Type and Category Filters */}
+        <div className="flex flex-wrap gap-4 mt-4">
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="type">
+              Tipo
+            </label>
+            <select
+              id="type"
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value as ContentType)}
+              className={`rounded-md ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'border-gray-300 text-gray-900'
+              } shadow-sm focus:border-[#1d528d] focus:ring-1 focus:ring-[#1d528d]`}
+            >
+              <option value="all">Todos os tipos</option>
+              <option value="video">Vídeos</option>
+              <option value="live">Aulas ao vivo</option>
+              <option value="image">Imagens</option>
+              <option value="document">Documentos</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="category">
+              Categoria
+            </label>
+            <select
+              id="category"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className={`rounded-md ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'border-gray-300 text-gray-900'
+              } shadow-sm focus:border-[#1d528d] focus:ring-1 focus:ring-[#1d528d]`}
+            >
+              <option value="all">Todas as categorias</option>
+              <option value="class">Aulas</option>
+              <option value="technique">Técnicas</option>
+              <option value="theory">Teoria</option>
+              <option value="workout">Treinos</option>
+            </select>
+          </div>
+        </div>
       </div>
+
+      {/* Content Grid/Feed */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedContent.map((content: OnlineContent) => (
+            <div
+              key={content.id}
+              className={`${
+                isDarkMode ? 'bg-gray-800' : 'bg-white'
+              } rounded-lg shadow-md overflow-hidden`}
+            >
+              <div className="relative aspect-video">
+                <img
+                  src={content.thumbnailUrl || 'https://via.placeholder.com/640x360?text=Sem+Thumbnail'}
+                  alt={content.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setEditingContent(content);
+                        setShowForm(true);
+                      }}
+                      className="p-2 bg-white rounded-full hover:bg-gray-100"
+                      title="Editar conteúdo"
+                    >
+                      <Edit2 size={20} className="text-gray-700" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(content.id)}
+                      className="p-2 bg-white rounded-full hover:bg-gray-100"
+                      title="Excluir conteúdo"
+                    >
+                      <Trash2 size={20} className="text-red-600" />
+                    </button>
+                  </div>
+                </div>
+                {!content.isPublished && (
+                  <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+                    Rascunho
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                  {content.title}
+                </h3>
+                <p className={`text-sm mb-4 line-clamp-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {content.description}
+                </p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
+                    {format(new Date(content.createdAt), 'dd/MM/yyyy', { locale: ptBR })}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {content.type === 'video' && <Video size={16} />}
+                    {content.type === 'live' && <Calendar size={16} />}
+                    {content.type === 'image' && <ImageIcon size={16} />}
+                    {content.type === 'document' && <FileText size={16} />}
+                    <span className="capitalize">{content.type}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {sortedContent.map((content: OnlineContent) => (
+            <div
+              key={content.id}
+              className={`${
+                isDarkMode ? 'bg-gray-800' : 'bg-white'
+              } rounded-lg shadow-md overflow-hidden`}
+            >
+              <div className="flex">
+                <div className="w-48 h-32 flex-shrink-0">
+                  <img
+                    src={content.thumbnailUrl || 'https://via.placeholder.com/640x360?text=Sem+Thumbnail'}
+                    alt={content.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-grow p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                      {content.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingContent(content);
+                          setShowForm(true);
+                        }}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="Editar conteúdo"
+                      >
+                        <Edit2 size={18} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(content.id)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="Excluir conteúdo"
+                      >
+                        <Trash2 size={18} className="text-red-600" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {content.description}
+                  </p>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
+                      {format(new Date(content.createdAt), 'dd/MM/yyyy', { locale: ptBR })}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {content.type === 'video' && <Video size={16} />}
+                      {content.type === 'live' && <Calendar size={16} />}
+                      {content.type === 'image' && <ImageIcon size={16} />}
+                      {content.type === 'document' && <FileText size={16} />}
+                      <span className="capitalize">{content.type}</span>
+                    </div>
+                    {!content.isPublished && (
+                      <span className="text-yellow-500 flex items-center gap-1">
+                        <EyeOff size={16} /> Rascunho
+                      </span>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <Users size={16} />
+                      <span>{content.targetBelts?.length || 0} faixas</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Content Form Modal */}
+      {showForm && (
+        <ContentForm
+          content={editingContent}
+          onClose={() => {
+            setShowForm(false);
+            setEditingContent(null);
+          }}
+          onSubmit={(data) => {
+            if (editingContent) {
+              updateContent({ ...editingContent, ...data });
+            } else {
+              addContent({
+                ...data,
+                createdAt: new Date().toISOString()
+              });
+            }
+            setShowForm(false);
+            setEditingContent(null);
+          }}
+        />
+      )}
     </div>
   );
 }

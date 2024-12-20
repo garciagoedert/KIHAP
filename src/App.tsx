@@ -128,7 +128,16 @@ function App() {
               )
             }
           />
-          <Route path="/portal" element={<StudentPortal />} />
+          <Route 
+            path="/portal" 
+            element={
+              user && user.role === 'student' ? (
+                <StudentPortal />
+              ) : (
+                <Navigate to="/login" />
+              )
+            } 
+          />
           <Route path="/store/:storeId" element={<StudentStoreRoute />} />
 
           {/* Catch all route */}

@@ -17,7 +17,8 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
     source: 'form',
     unitId: units[0]?.id || '',
     notes: '',
-    value: 0
+    value: 0,
+    status: 'novo'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 

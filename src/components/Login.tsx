@@ -22,6 +22,7 @@ export default function Login() {
       return;
     }
 
+    console.log('Tentando fazer login com:', { email, password });
     const success = login(email, password);
     if (success) {
       // Get the current user after login
@@ -96,6 +97,9 @@ export default function Login() {
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1d528d] focus:ring-1 focus:ring-[#1d528d]"
                 placeholder="seu@email.com"
                 required
+                autoComplete="email"
+                name="email"
+                id="email"
               />
             </div>
 
@@ -111,6 +115,9 @@ export default function Login() {
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1d528d] focus:ring-1 focus:ring-[#1d528d]"
                   placeholder="••••••••"
                   required
+                  autoComplete="current-password"
+                  name="password"
+                  id="password"
                 />
                 <button
                   type="button"

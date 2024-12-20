@@ -1,4 +1,4 @@
-import { Store, Product, Unit, User, Badge, OnlineContent, LiveClass, Lead } from './types';
+import { Store, Product, Unit, User, Badge, OnlineContent, LiveClass, Lead, Student } from './types';
 
 export const initialLeads: Lead[] = [
   {
@@ -232,6 +232,44 @@ export const initialUnits: Unit[] = [
         parentUnitId: '3'
       }
     ]
+  },
+  {
+    id: '4',
+    name: 'Tatame Online',
+    city: 'Online',
+    address: 'Plataforma Online',
+    phone: '0800 123 4567',
+    type: 'online' as const,
+    subunits: []
+  }
+];
+
+export const initialStudents: Student[] = [
+  {
+    id: '1',
+    name: 'João Silva',
+    email: 'joao.silva@email.com',
+    phone: '(48) 99999-1111',
+    birthDate: '1990-01-01',
+    enrollmentDate: new Date().toISOString(),
+    status: 'active',
+    unitId: '1',
+    belt: 'branca',
+    active: true,
+    physicalTests: []
+  },
+  {
+    id: '2',
+    name: 'Maria Santos',
+    email: 'maria.santos@email.com',
+    phone: '(48) 99999-2222',
+    birthDate: '1995-05-15',
+    enrollmentDate: new Date().toISOString(),
+    status: 'active',
+    unitId: '1',
+    belt: 'amarela',
+    active: true,
+    physicalTests: []
   }
 ];
 

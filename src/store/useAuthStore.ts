@@ -18,6 +18,10 @@ export const useAuthStore = create<AuthState>()((set) => ({
     const users = dataStore.users.length > 0 ? dataStore.users : initialUsers;
     const staffUser = users.find(u => u.email === email && u.password === password);
     
+    console.log('Login attempt:', { email, password });
+    console.log('Available users:', users);
+    console.log('Staff user found:', staffUser);
+    
     if (staffUser) {
       const { password: _, ...userWithoutPassword } = staffUser;
       set({ user: userWithoutPassword as User });
@@ -27,6 +31,9 @@ export const useAuthStore = create<AuthState>()((set) => ({
     // If no staff user found, check for student users
     const { students } = dataStore;
     const student = students.find(s => s.email === email);
+    
+    console.log('Available students:', students);
+    console.log('Student found:', student);
     
     if (student) {
       // Default password for all students

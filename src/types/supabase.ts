@@ -120,6 +120,10 @@ export interface Lead {
   status: LeadStatus;
   createdAt: string;
   history?: LeadHistory[];
+  priority?: 'baixa' | 'media' | 'alta';
+  nextContactDate?: string;
+  lastContactDate?: string;
+  tags?: string[];
 }
 
 export interface CreateLeadInput {
@@ -130,6 +134,7 @@ export interface CreateLeadInput {
   unitId: string;
   notes?: string;
   value?: number;
+  status?: LeadStatus;
 }
 
 export interface UpdateLeadInput {
@@ -143,6 +148,10 @@ export interface UpdateLeadInput {
   value?: number;
   status?: LeadStatus;
   history?: LeadHistory[];
+  priority?: 'baixa' | 'media' | 'alta';
+  nextContactDate?: string;
+  lastContactDate?: string;
+  tags?: string[];
 }
 
 export interface Task {

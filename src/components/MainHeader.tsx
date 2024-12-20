@@ -55,18 +55,29 @@ export default function MainHeader() {
     return (
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="p-3 bg-[#dfa129] hover:bg-[#c78b1f] rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dfa129]"
-        aria-label="Menu"
+        className="relative p-3 bg-[#dfa129] hover:bg-[#c78b1f] rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dfa129] overflow-hidden group"
+        aria-label="Menu principal"
+        aria-controls="mobile-menu"
+        aria-haspopup="menu"
         data-state={isMenuOpen ? "open" : "closed"}
       >
         <div className="relative w-6 h-6">
-          <div className={`absolute transition-all duration-300 ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`}>
+          <div 
+            className={`absolute top-0 left-0 transition-transform duration-300 ${
+              isMenuOpen ? 'transform -translate-y-full opacity-0' : 'transform translate-y-0 opacity-100'
+            }`}
+          >
             <Menu size={24} className="text-white" />
           </div>
-          <div className={`absolute transition-all duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'}`}>
+          <div 
+            className={`absolute top-0 left-0 transition-transform duration-300 ${
+              isMenuOpen ? 'transform translate-y-0 opacity-100' : 'transform translate-y-full opacity-0'
+            }`}
+          >
             <X size={24} className="text-white" />
           </div>
         </div>
+        <span className="absolute inset-0 bg-white/30 transform scale-0 opacity-0 group-active:scale-100 group-active:opacity-100 transition-all duration-300 rounded-lg"></span>
       </button>
     );
   };
@@ -92,33 +103,33 @@ export default function MainHeader() {
       </header>
 
       <div 
-        className={`fixed inset-0 bg-black transition-all duration-500 ease-in-out z-[90] ${
-          isMenuOpen ? 'bg-opacity-50 pointer-events-auto' : 'bg-opacity-0 pointer-events-none'
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm transition-all duration-500 ease-in-out z-[90] ${
+          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsMenuOpen(false)}
         aria-hidden="true"
       />
 
-      <div 
+      <nav 
         id="mobile-menu"
         className={`fixed top-0 right-0 h-full w-[280px] bg-[#303030] shadow-xl transform transition-all duration-500 ease-in-out z-[110] ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Menu de navegação"
+        role="navigation"
+        aria-label="Menu principal"
       >
         <div className="p-4 border-b border-gray-700 flex justify-end">
           <button
             onClick={() => setIsMenuOpen(false)}
-            className="p-3 bg-[#dfa129] hover:bg-[#c78b1f] rounded-lg transition-all duration-300 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dfa129]"
+            className="p-3 bg-[#dfa129] hover:bg-[#c78b1f] rounded-lg transition-all duration-300 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dfa129] group overflow-hidden relative"
             aria-label="Fechar Menu"
           >
-            <X size={24} className="text-white" />
+            <X size={24} className="text-white relative z-10" />
+            <span className="absolute inset-0 bg-white/30 transform scale-0 opacity-0 group-active:scale-100 group-active:opacity-100 transition-all duration-300 rounded-lg"></span>
           </button>
         </div>
 
-        <nav className="flex flex-col h-[calc(100%-80px)]" aria-label="Menu principal">
+        <div className="flex flex-col h-[calc(100%-80px)]">
           <div className="flex-1 overflow-y-auto py-4">
             <div className="space-y-2 px-4">
               <ScrollToTopLink
@@ -165,19 +176,27 @@ export default function MainHeader() {
               <div className="border-t border-gray-700 pt-4 mb-2">
                 <button
                   onClick={() => handleSubmenuToggle('programs')}
-                  className="w-full flex items-center justify-between text-white hover:text-gray-300 transition-all duration-300 text-lg py-3 px-4 rounded-lg hover:bg-gray-700/50"
+                  className="relative w-full flex items-center justify-between text-white hover:text-gray-300 transition-all duration-300 text-lg py-3 px-4 rounded-lg hover:bg-gray-700/50 group overflow-hidden"
+                  aria-label={`${isProgramsOpen ? 'Fechar' : 'Abrir'} menu de programas`}
                   data-state={isProgramsOpen ? "open" : "closed"}
                 >
                   <span>Programas</span>
-                  <div className="transition-transform duration-300" style={{ transform: isProgramsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  <div 
+                    className="transition-transform duration-300 transform group-hover:scale-110" 
+                    style={{ transform: `rotate(${isProgramsOpen ? 180 : 0}deg)` }}
+                  >
                     <ChevronDown size={24} />
                   </div>
+                  <span className="absolute inset-0 bg-white/10 transform scale-0 opacity-0 group-active:scale-100 group-active:opacity-100 transition-all duration-300 rounded-lg"></span>
                 </button>
                 
                 <div 
-                  className="overflow-hidden transition-all duration-300"
+                  id="programs-menu"
+                  className="overflow-hidden transition-all duration-500 ease-in-out"
                   style={{
-                    height: isProgramsOpen ? `${programsItems.length * 60}px` : '0px'
+                    maxHeight: isProgramsOpen ? `${programsItems.length * 60}px` : '0px',
+                    opacity: isProgramsOpen ? 1 : 0,
+                    transform: `translateY(${isProgramsOpen ? 0 : -8}px)`
                   }}
                 >
                   <div className="pl-4 border-l-2 border-gray-700 mt-2">
@@ -199,19 +218,27 @@ export default function MainHeader() {
               <div className="border-t border-gray-700 pt-4 mb-2">
                 <button
                   onClick={() => handleSubmenuToggle('units')}
-                  className="w-full flex items-center justify-between text-white hover:text-gray-300 transition-all duration-300 text-lg py-3 px-4 rounded-lg hover:bg-gray-700/50"
+                  className="relative w-full flex items-center justify-between text-white hover:text-gray-300 transition-all duration-300 text-lg py-3 px-4 rounded-lg hover:bg-gray-700/50 group overflow-hidden"
+                  aria-label={`${isUnitsOpen ? 'Fechar' : 'Abrir'} menu de unidades`}
                   data-state={isUnitsOpen ? "open" : "closed"}
                 >
                   <span>Unidades</span>
-                  <div className="transition-transform duration-300" style={{ transform: isUnitsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  <div 
+                    className="transition-transform duration-300 transform group-hover:scale-110" 
+                    style={{ transform: `rotate(${isUnitsOpen ? 180 : 0}deg)` }}
+                  >
                     <ChevronDown size={24} />
                   </div>
+                  <span className="absolute inset-0 bg-white/10 transform scale-0 opacity-0 group-active:scale-100 group-active:opacity-100 transition-all duration-300 rounded-lg"></span>
                 </button>
                 
                 <div 
-                  className="overflow-hidden transition-all duration-300"
+                  id="units-menu"
+                  className="overflow-hidden transition-all duration-500 ease-in-out"
                   style={{
-                    height: isUnitsOpen ? `${unitsItems.length * 60}px` : '0px'
+                    maxHeight: isUnitsOpen ? `${unitsItems.length * 60}px` : '0px',
+                    opacity: isUnitsOpen ? 1 : 0,
+                    transform: `translateY(${isUnitsOpen ? 0 : -8}px)`
                   }}
                 >
                   <div className="pl-4 border-l-2 border-gray-700 mt-2">
@@ -234,14 +261,15 @@ export default function MainHeader() {
           <div className="mt-auto p-4 border-t border-gray-700">
             <ScrollToTopLink
               to="/portal"
-              className="block w-full bg-[#dfa129] text-white px-6 py-3 rounded-lg hover:bg-[#c78b1f] transition-all duration-300 text-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dfa129]"
+              className="block w-full bg-[#dfa129] text-white px-6 py-3 rounded-lg hover:bg-[#c78b1f] transition-all duration-300 text-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dfa129] relative group overflow-hidden"
               onClick={() => setIsMenuOpen(false)}
             >
-              Área do Aluno
+              <span className="relative z-10">Área do Aluno</span>
+              <span className="absolute inset-0 bg-white/30 transform scale-0 opacity-0 group-active:scale-100 group-active:opacity-100 transition-all duration-300 rounded-lg"></span>
             </ScrollToTopLink>
           </div>
-        </nav>
-      </div>
+        </div>
+      </nav>
     </>
   );
 }

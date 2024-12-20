@@ -69,7 +69,7 @@ const cities = [
     state: 'DF',
     path: '/unidade/brasilia',
     image: 'https://images.pexels.com/photos/29471958/pexels-photo-29471958.jpeg',
-    unitsCount: 3
+    unitsCount: 5
   },
   {
     name: 'Dourados',

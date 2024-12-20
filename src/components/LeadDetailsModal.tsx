@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { X, Calendar, Phone, Mail, DollarSign, Clock, Plus } from 'lucide-react';
+import { X, Calendar, Phone, Mail, DollarSign, Clock, Plus, Tag, AlertCircle } from 'lucide-react';
 import { Lead, LeadHistory, LeadStatus } from '../types/supabase';
 import { useDataStore } from '../store/useDataStore';
+import { useThemeStore } from '../store/useThemeStore';
 
 interface LeadDetailsModalProps {
   lead: Lead;
   onClose: () => void;
   userId: string;
 }
+
+const priorityOptions = [
+  { value: 'baixa', label: 'Baixa', color: 'bg-blue-500' },
+  { value: 'media', label: 'Média', color: 'bg-yellow-500' },
+  { value: 'alta', label: 'Alta', color: 'bg-red-500' }
+] as const;
 
 const statusLabels: Record<LeadStatus, string> = {
   novo: 'Novo Lead',
@@ -29,11 +36,26 @@ const statusColors: Record<LeadStatus, string> = {
 
 export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsModalProps) {
   const { updateLead } = useDataStore();
+  const isDarkMode = useThemeStore(state => state.isDarkMode);
   const [note, setNote] = useState('');
   const [contact, setContact] = useState('');
-  const [nextContactDate, setNextContactDate] = useState('');
+  const [nextContactDate, setNextContactDate] = useState(lead.nextContactDate || '');
   const [isEditing, setIsEditing] = useState(false);
   const [editedLead, setEditedLead] = useState(lead);
+  const [newTag, setNewTag] = useState('');
+
+  const handleAddTag = () => {
+    if (newTag.trim()) {
+      const updatedTags = [...(editedLead.tags || []), newTag.trim()];
+      setEditedLead({ ...editedLead, tags: updatedTags });
+      setNewTag('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updatedTags = editedLead.tags?.filter(tag => tag !== tagToRemove) || [];
+    setEditedLead({ ...editedLead, tags: updatedTags });
+  };
 
   const handleSaveNote = () => {
     if (note.trim()) {
@@ -67,10 +89,11 @@ export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsM
 
       updateLead({
         ...lead,
-        history: [...(lead.history || []), newHistoryItem]
+        history: [...(lead.history || []), newHistoryItem],
+        nextContactDate,
+        lastContactDate: new Date().toISOString()
       });
       setContact('');
-      setNextContactDate('');
     }
   };
 
@@ -94,12 +117,12 @@ export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsM
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-800">Detalhes do Lead</h2>
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto`}>
+        <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
+          <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Detalhes do Lead</h2>
           <button 
             onClick={onClose} 
-            className="text-gray-500 hover:text-gray-700"
+            className={`${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`}
             title="Fechar modal"
             aria-label="Fechar modal"
           >
@@ -108,6 +131,80 @@ export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsM
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Prioridade */}
+          <div className="border-b pb-4">
+            <h4 className={`text-lg font-medium mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Prioridade</h4>
+            <div className="flex gap-3">
+              {priorityOptions.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => setEditedLead({ ...editedLead, priority: option.value })}
+                  className={`flex items-center px-3 py-1.5 rounded-full text-sm ${
+                    editedLead.priority === option.value
+                      ? `${option.color} text-white`
+                      : isDarkMode
+                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <AlertCircle size={14} className="mr-1" />
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="border-b pb-4">
+            <h4 className={`text-lg font-medium mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Tags</h4>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {editedLead.tags?.map(tag => (
+                <span
+                  key={tag}
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-sm ${
+                    isDarkMode
+                      ? 'bg-gray-700 text-gray-300'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  <Tag size={14} className="mr-1" />
+                  {tag}
+                  <button
+                    onClick={() => handleRemoveTag(tag)}
+                    className="ml-1 text-gray-400 hover:text-gray-600"
+                    title={`Remover tag ${tag}`}
+                    aria-label={`Remover tag ${tag}`}
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Nova tag..."
+                className={`flex-1 p-2 rounded-lg border ${
+                  isDarkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-200 text-gray-800'
+                }`}
+              />
+              <button
+                onClick={handleAddTag}
+                disabled={!newTag.trim()}
+                className={`px-4 py-2 rounded-lg ${
+                  isDarkMode
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                } disabled:opacity-50`}
+              >
+                Adicionar
+              </button>
+            </div>
+          </div>
           {/* Informações Básicas */}
           <div className="space-y-4">
             {isEditing ? (
