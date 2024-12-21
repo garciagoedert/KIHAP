@@ -31,6 +31,7 @@ import About from './components/About';
 import Metodologia from './components/Metodologia';
 import KihapEmAcao from './components/KihapEmAcao';
 import KihapAcademy from './components/KihapAcademy';
+import KihapExperienceLanding from './components/KihapExperienceLanding';
 import FutureUnitLanding from './components/FutureUnitLanding';
 import StoreList from './components/store/StoreList';
 import StoreWrapper from './components/store/StoreWrapper';
@@ -84,6 +85,7 @@ function App() {
           <Route path="/metodologia" element={<Metodologia />} />
           <Route path="/kihap-em-acao" element={<KihapEmAcao />} />
           <Route path="/kihap-academy" element={<KihapAcademy />} />
+          <Route path="/experience" element={<KihapExperienceLanding />} />
           <Route path="/pre-matricula" element={<FutureUnitLanding />} />
           <Route path="/cadastro" element={<LeadRegistrationPage />} />
           <Route path="/unidade/:location" element={<LocationLanding />} />
