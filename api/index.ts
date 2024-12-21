@@ -1,4 +1,3 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import { initTRPC } from '@trpc/server';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { z } from 'zod';
@@ -219,40 +218,77 @@ const appRouter = router({
 // Tipos exportados
 export type AppRouter = typeof appRouter;
 
-// Handler para requisições Vercel
+// Handler para requisições Vercel V0
+export const config = {
+  runtime: 'edge',
+  regions: ['gru1'], // São Paulo
+};
+
 export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse,
+  req: Request,
 ) {
-  // Habilita CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Request-Method', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
-  res.setHeader('Access-Control-Allow-Headers', '*');
+  // Configuração de CORS
+  const origin = req.headers.get('origin');
+  const allowedOrigins = [
+    'https://kihap.vercel.app',
+    'http://localhost:5177',
+    'http://localhost:5173'
+  ];
+
+  const corsHeaders = {
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Origin': allowedOrigins.includes(origin || '') 
+      ? origin! 
+      : allowedOrigins[0],
+  };
 
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
   }
 
   // Tratamento de erros global
   try {
-    return await fetchRequestHandler({
+    const response = await fetchRequestHandler({
       endpoint: '/api',
-      req: req as unknown as Request,
+      req,
       router: appRouter,
       createContext: () => ({}),
+    });
+
+    // Adiciona headers CORS à resposta
+    const responseHeaders = new Headers(response.headers);
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      responseHeaders.set(key, value);
+    });
+
+    return new Response(response.body, {
+      status: response.status,
+      headers: responseHeaders,
     });
   } catch (error) {
     console.error('API Error:', error);
     const apiError = error as ApiError;
-    res.status(500).json({
-      error: {
-        message: apiError.message || 'Erro interno do servidor',
-        code: apiError.code,
-        details: apiError.details
+    
+    return new Response(
+      JSON.stringify({
+        error: {
+          message: apiError.message || 'Erro interno do servidor',
+          code: apiError.code,
+          details: apiError.details
+        }
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
       }
-    });
+    );
   }
 }
