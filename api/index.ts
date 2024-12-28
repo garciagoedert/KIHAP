@@ -218,41 +218,51 @@ const appRouter = router({
 // Tipos exportados
 export type AppRouter = typeof appRouter;
 
-// Handler para requisições Vercel V0
+// Handler para requisições Vercel Edge
 export const config = {
   runtime: 'edge',
   regions: ['gru1'], // São Paulo
 };
 
-export default async function handler(
-  req: Request,
-) {
-  // Configuração de CORS
-  const origin = req.headers.get('origin');
-  const allowedOrigins = [
+// Função auxiliar para validar origens
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return false;
+
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boolean);
+  const defaultOrigins = [
     'https://kihap.vercel.app',
     'http://localhost:5177',
     'http://localhost:5173'
   ];
 
-  const corsHeaders = {
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin || '') 
-      ? origin! 
-      : allowedOrigins[0],
-  };
+  return [...allowedOrigins, ...defaultOrigins].includes(origin);
+}
 
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
-  }
-
-  // Tratamento de erros global
+export default async function handler(req: Request) {
   try {
+    const origin = req.headers.get('origin');
+    
+    // Headers CORS dinâmicos baseados na origem
+    const corsHeaders = {
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version',
+      'Access-Control-Allow-Origin': isAllowedOrigin(origin) ? origin! : 'https://kihap.vercel.app',
+      'Access-Control-Allow-Credentials': 'true',
+    };
+
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
+    }
+
+    // Validação de ambiente e variáveis necessárias
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Configurações do Supabase não encontradas');
+    }
+
     const response = await fetchRequestHandler({
       endpoint: '/api',
       req,
@@ -270,24 +280,30 @@ export default async function handler(
       status: response.status,
       headers: responseHeaders,
     });
+
   } catch (error) {
     console.error('API Error:', error);
     const apiError = error as ApiError;
     
+    // Headers CORS para respostas de erro
+    const errorHeaders = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    };
+
     return new Response(
       JSON.stringify({
         error: {
           message: apiError.message || 'Erro interno do servidor',
-          code: apiError.code,
-          details: apiError.details
+          code: apiError.code || 'INTERNAL_SERVER_ERROR',
+          details: apiError.details || null
         }
       }),
       {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
+        status: apiError.code === 'NOT_FOUND' ? 404 : 500,
+        headers: errorHeaders,
       }
     );
   }
