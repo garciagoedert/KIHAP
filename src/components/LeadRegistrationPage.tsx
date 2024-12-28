@@ -164,7 +164,7 @@ export default function LeadRegistrationPage() {
         </section>
 
         {/* Benefits Section */}
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
               Por que escolher a KIHAP?

@@ -379,7 +379,7 @@ export default function ProgramLanding() {
       <main className="pt-16">
         {/* Hero Section */}
         <section 
-          className="h-screen relative flex items-center"
+          className="h-[70vh] relative flex items-center"
           style={{
             backgroundImage: `linear-gradient(rgba(48, 48, 48, 0.6), rgba(48, 48, 48, 0.6)), url(${data.image})`,
             backgroundSize: 'cover',
@@ -391,11 +391,8 @@ export default function ProgramLanding() {
               <h1 className="text-4xl font-bold text-white mb-2">
                 Programa {data.name}
               </h1>
-              <p className="text-xl text-gray-200 mb-4">
+              <p className="text-xl text-gray-200 mb-8">
                 Para {data.ageRange}
-              </p>
-              <p className="text-gray-300 mb-8 whitespace-pre-line">
-                {data.description}
               </p>
               <Link
                 to="/cadastro"
@@ -403,6 +400,19 @@ export default function ProgramLanding() {
               >
                 Agende uma experiência
               </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Descrição */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-gray-50 rounded-lg p-8">
+                <p className="text-gray-700 whitespace-pre-line">
+                  {data.description}
+                </p>
+              </div>
             </div>
           </div>
         </section>
