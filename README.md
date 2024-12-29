@@ -78,18 +78,28 @@ O frontend estará disponível em `http://localhost` e se conectará automaticam
   - Conexão automática com o servidor
   - Indicador de status de conexão
 
-## Desenvolvimento
+## Desenvolvimento e Deploy
 
-Para desenvolvimento local:
+### Desenvolvimento Local
 ```bash
 npm run dev
 ```
 
-Para construir para produção:
+### Produção Local
 ```bash
 npm run build
+npm run serve
 ```
 
-Para servir a versão de produção:
-```bash
-npm run serve
+### Deploy no Vercel
+
+1. Conecte seu repositório ao Vercel
+2. Configure a variável de ambiente no Vercel:
+   - VITE_SERVER_URL: http://[IP-DO-SEU-SERVIDOR]:3000
+
+3. O Vercel irá:
+   - Usar as configurações do vercel.json
+   - Construir o frontend estático
+   - Servir apenas o frontend
+
+4. O frontend no Vercel se conectará ao seu servidor central através do IP configurado

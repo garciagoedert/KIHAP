@@ -1,5 +1,5 @@
 // Endereço do servidor central
-// Em desenvolvimento, usa localhost
+// Em desenvolvimento, usa a variável de ambiente ou localhost
 // Em produção, deve ser configurado com o IP do servidor central
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
@@ -25,3 +25,6 @@ export async function getServerInfo() {
     return null;
   }
 }
+
+// Verifica se está rodando em produção (Vercel)
+export const isProduction = import.meta.env.PROD;
