@@ -12,7 +12,7 @@ const getBaseUrl = () => {
     return `https://${process.env.VERCEL_URL}`;
   }
   // fallback para localhost
-  return `http://localhost:5177`;
+  return `http://localhost:3000`;
 };
 
 export const trpc = createTRPCProxyClient<AppRouter>({

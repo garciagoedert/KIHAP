@@ -1,14 +1,13 @@
 import { initTRPC } from '@trpc/server';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { z } from 'zod';
-import { createClient } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid';
+import Database from 'better-sqlite3';
 import type {
   KihapEvent,
   EventCheckin,
   Student,
   Lead,
-  CreateEventParams,
-  CreateCheckinParams,
   ApiError
 } from '../src/types/supabase';
 
@@ -17,10 +16,8 @@ const t = initTRPC.create();
 const router = t.router;
 const publicProcedure = t.procedure;
 
-// Inicialização do Supabase
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Inicialização do SQLite
+const db = new Database('server/database.sqlite');
 
 // Schemas Zod
 const eventSchema = z.object({
@@ -47,34 +44,54 @@ const leadSchema = z.object({
   status: z.enum(['novo', 'contato', 'visitou', 'matriculado', 'desistente']).default('novo')
 });
 
+// Função auxiliar para verificar se um aluno pode fazer checkin
+function canStudentCheckin(eventId: string, studentId: string): boolean {
+  const event = db.prepare('SELECT date FROM kihap_events WHERE id = ?').get(eventId);
+  if (!event) return false;
+
+  const hasCheckin = db.prepare(
+    'SELECT 1 FROM event_checkins WHERE event_id = ? AND student_id = ?'
+  ).get(eventId, studentId);
+  if (hasCheckin) return false;
+
+  const eventDate = new Date(event.date);
+  const now = new Date();
+  const hoursDiff = Math.abs(eventDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+  return hoursDiff <= 2;
+}
+
 // Rotas da API
 const appRouter = router({
   // Leads
-  getLeads: publicProcedure.query(async () => {
-    const { data, error } = await supabase
-      .from('leads')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data as Lead[];
+  getLeads: publicProcedure.query(() => {
+    return db.prepare('SELECT * FROM leads ORDER BY created_at DESC').all() as Lead[];
   }),
 
   createLead: publicProcedure
     .input(leadSchema)
-    .mutation(async ({ input }) => {
-      const { data, error } = await supabase
-        .from('leads')
-        .insert([{
-          ...input,
-          created_at: new Date().toISOString(),
-          history: []
-        }])
-        .select()
-        .single();
+    .mutation(({ input }) => {
+      const id = uuidv4();
+      const created_at = new Date().toISOString();
       
-      if (error) throw error;
-      return data as Lead;
+      db.prepare(`
+        INSERT INTO leads (id, name, email, phone, source, unitId, notes, value, status, created_at, history)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        id,
+        input.name,
+        input.email,
+        input.phone,
+        input.source,
+        input.unitId,
+        input.notes,
+        input.value,
+        input.status,
+        created_at,
+        '[]'
+      );
+
+      return db.prepare('SELECT * FROM leads WHERE id = ?').get(id) as Lead;
     }),
 
   updateLead: publicProcedure
@@ -82,54 +99,56 @@ const appRouter = router({
       id: z.string().uuid(),
       ...leadSchema.partial().shape
     }))
-    .mutation(async ({ input }) => {
+    .mutation(({ input }) => {
       const { id, ...updateData } = input;
-      const { data, error } = await supabase
-        .from('leads')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data as Lead;
+      const setClause = Object.keys(updateData)
+        .map(key => `${key} = @${key}`)
+        .join(', ');
+
+      db.prepare(`
+        UPDATE leads
+        SET ${setClause}
+        WHERE id = @id
+      `).run({ ...updateData, id });
+
+      return db.prepare('SELECT * FROM leads WHERE id = ?').get(id) as Lead;
     }),
 
   // Eventos
-  getEvents: publicProcedure.query(async () => {
-    const { data, error } = await supabase
-      .from('kihap_events')
-      .select('*')
-      .order('date', { ascending: true });
-    
-    if (error) throw error;
-    return data as KihapEvent[];
+  getEvents: publicProcedure.query(() => {
+    return db.prepare(
+      'SELECT * FROM kihap_events WHERE active = 1 ORDER BY date ASC'
+    ).all() as KihapEvent[];
   }),
 
   getEventById: publicProcedure
     .input(z.string().uuid())
-    .query(async ({ input }) => {
-      const { data, error } = await supabase
-        .from('kihap_events')
-        .select('*')
-        .eq('id', input)
-        .single();
-      
-      if (error) throw error;
-      return data as KihapEvent;
+    .query(({ input }) => {
+      return db.prepare(
+        'SELECT * FROM kihap_events WHERE id = ?'
+      ).get(input) as KihapEvent;
     }),
 
   createEvent: publicProcedure
     .input(eventSchema)
-    .mutation(async ({ input }) => {
-      const { data, error } = await supabase
-        .from('kihap_events')
-        .insert([input])
-        .select()
-        .single();
+    .mutation(({ input }) => {
+      const id = uuidv4();
+      const created_at = new Date().toISOString();
       
-      if (error) throw error;
-      return data as KihapEvent;
+      db.prepare(`
+        INSERT INTO kihap_events (id, name, description, date, location, unit_id, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        id,
+        input.name,
+        input.description,
+        input.date,
+        input.location,
+        input.unit_id,
+        created_at
+      );
+
+      return db.prepare('SELECT * FROM kihap_events WHERE id = ?').get(id) as KihapEvent;
     }),
 
   updateEvent: publicProcedure
@@ -137,117 +156,73 @@ const appRouter = router({
       id: z.string().uuid(),
       ...eventSchema.partial().shape
     }))
-    .mutation(async ({ input }) => {
+    .mutation(({ input }) => {
       const { id, ...updateData } = input;
-      const { data, error } = await supabase
-        .from('kihap_events')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data as KihapEvent;
+      const setClause = Object.keys(updateData)
+        .map(key => `${key} = @${key}`)
+        .join(', ');
+
+      db.prepare(`
+        UPDATE kihap_events
+        SET ${setClause}, updated_at = @updated_at
+        WHERE id = @id
+      `).run({ ...updateData, id, updated_at: new Date().toISOString() });
+
+      return db.prepare('SELECT * FROM kihap_events WHERE id = ?').get(id) as KihapEvent;
     }),
 
   // Checkins
   getEventCheckins: publicProcedure
     .input(z.string().uuid())
-    .query(async ({ input }) => {
-      const { data, error } = await supabase
-        .from('event_checkins_with_details')
-        .select('*')
-        .eq('event_id', input);
-      
-      if (error) throw error;
-      return data;
+    .query(({ input }) => {
+      return db.prepare(
+        'SELECT * FROM event_checkins_with_details WHERE event_id = ?'
+      ).all(input);
     }),
 
   createCheckin: publicProcedure
     .input(checkinSchema)
-    .mutation(async ({ input }) => {
-      // Verifica se o aluno pode fazer checkin
-      const { data: canCheckin } = await supabase
-        .rpc('can_student_checkin', {
-          p_event_id: input.event_id,
-          p_student_id: input.student_id
-        });
-
-      if (!canCheckin) {
+    .mutation(({ input }) => {
+      if (!canStudentCheckin(input.event_id, input.student_id)) {
         throw new Error('Checkin não permitido neste momento');
       }
 
-      const { data, error } = await supabase
-        .from('event_checkins')
-        .insert([{
-          ...input,
-          checkin_time: new Date().toISOString()
-        }])
-        .select()
-        .single();
+      const id = uuidv4();
+      const checkin_time = new Date().toISOString();
       
-      if (error) throw error;
-      return data as EventCheckin;
+      db.prepare(`
+        INSERT INTO event_checkins (id, event_id, student_id, checkin_time)
+        VALUES (?, ?, ?, ?)
+      `).run(id, input.event_id, input.student_id, checkin_time);
+
+      return db.prepare('SELECT * FROM event_checkins WHERE id = ?').get(id) as EventCheckin;
     }),
 
   // Estudantes
-  getStudents: publicProcedure.query(async () => {
-    const { data, error } = await supabase
-      .from('students')
-      .select('*')
-      .order('name');
-    
-    if (error) throw error;
-    return data as Student[];
+  getStudents: publicProcedure.query(() => {
+    return db.prepare('SELECT * FROM students ORDER BY name').all() as Student[];
   }),
 
   getStudentById: publicProcedure
     .input(z.string().uuid())
-    .query(async ({ input }) => {
-      const { data, error } = await supabase
-        .from('students')
-        .select('*')
-        .eq('id', input)
-        .single();
-      
-      if (error) throw error;
-      return data as Student;
+    .query(({ input }) => {
+      return db.prepare('SELECT * FROM students WHERE id = ?').get(input) as Student;
     })
 });
 
 // Tipos exportados
 export type AppRouter = typeof appRouter;
 
-// Handler para requisições Vercel Edge
-export const config = {
-  runtime: 'edge',
-  regions: ['gru1'], // São Paulo
-};
-
-// Função auxiliar para validar origens
-function isAllowedOrigin(origin: string | null): boolean {
-  if (!origin) return false;
-
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boolean);
-  const defaultOrigins = [
-    'https://kihap.vercel.app',
-    'http://localhost:5177',
-    'http://localhost:5173'
-  ];
-
-  return [...allowedOrigins, ...defaultOrigins].includes(origin);
-}
-
+// Handler para requisições
 export default async function handler(req: Request) {
   try {
     const origin = req.headers.get('origin');
     
-    // Headers CORS dinâmicos baseados na origem
+    // Headers CORS
     const corsHeaders = {
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version',
-      'Access-Control-Allow-Origin': isAllowedOrigin(origin) ? origin! : 'https://kihap.vercel.app',
-      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Origin': '*',
     };
 
     // Handle CORS preflight
@@ -256,11 +231,6 @@ export default async function handler(req: Request) {
         status: 204,
         headers: corsHeaders,
       });
-    }
-
-    // Validação de ambiente e variáveis necessárias
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Configurações do Supabase não encontradas');
     }
 
     const response = await fetchRequestHandler({
@@ -285,14 +255,6 @@ export default async function handler(req: Request) {
     console.error('API Error:', error);
     const apiError = error as ApiError;
     
-    // Headers CORS para respostas de erro
-    const errorHeaders = {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    };
-
     return new Response(
       JSON.stringify({
         error: {
@@ -303,7 +265,10 @@ export default async function handler(req: Request) {
       }),
       {
         status: apiError.code === 'NOT_FOUND' ? 404 : 500,
-        headers: errorHeaders,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
       }
     );
   }
