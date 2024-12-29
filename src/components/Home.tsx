@@ -128,6 +128,39 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Why Kihap Section */}
+        <section className="py-16 md:py-20 bg-[#1d528d]">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-center text-white mb-12">Por que Kihap?</h2>
+              
+              <div className="space-y-12">
+                <div className="text-lg text-gray-200 leading-relaxed">
+                  <p className="mb-8">
+                    KI se traduz em ENERGIA, então a palavra KiHap, que significa gritar quando você atinge um alvo, basicamente se traduz em GRITO DE ENERGIA. Você está entregando sua energia ao alvo. Entendemos que no processo mental e emocional, conseguir estabelecer seus alvos, utilizar da disciplina para conquistá-los e conseguir canalizar e exteriorizar a energia necessária para atingi-lo, é fundamental para que se tenha uma vida de atitudes ativas e não somente atitudes reativas.
+                  </p>
+
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-xl font-bold text-[#dfa129] mb-4">Artes Marciais:</h3>
+                      <p>
+                        Temos como missão ajudar a melhorar o mundo desenvolvendo pessoas na parte física e mental, através da filosofia e arte marcial Kihap. Nossos alunos têm acesso a um ambiente familiar e são conduzidos de forma gradual e controlada a superar seus limites e desenvolver habilidades como consistência, disciplina, cortesia e honra.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-bold text-[#dfa129] mb-4">Desenvolvimento pessoal:</h3>
+                      <p>
+                        Nossa história de busca por excelência física, técnica e mental, desenvolvimento de pessoas, formação de times e gestão de negócios foi consolidada em um método para te levar para a mente faixa preta e atingir seus objetivos fora do tatame.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Programs Section */}
         <section className="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-gray-100">
           <div className="container mx-auto px-4">
