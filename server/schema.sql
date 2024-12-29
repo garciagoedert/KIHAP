@@ -1,3 +1,9 @@
+-- Tabela de metadados de sincronização
+CREATE TABLE IF NOT EXISTS sync_meta (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
 -- Tabela para unidades
 CREATE TABLE IF NOT EXISTS units (
   id TEXT PRIMARY KEY,

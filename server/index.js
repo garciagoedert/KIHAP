@@ -6,6 +6,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import os from 'os';
 
 config(); // Load environment variables
 
@@ -22,10 +23,11 @@ db.exec(schema);
 const app = express();
 const port = 3000;
 
+// Configura CORS para permitir acesso de qualquer origem
 app.use(cors());
 app.use(express.json());
 
-// Middleware para simular autenticação local
+// Middleware para autenticação básica
 const authMiddleware = (req, res, next) => {
   // Por enquanto, vamos considerar todos os requests como autenticados
   // Em produção, você implementaria verificação de token JWT aqui
@@ -35,6 +37,20 @@ const authMiddleware = (req, res, next) => {
   };
   next();
 };
+
+// Função para obter o IP da máquina
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Pula endereços não IPv4 e localhost
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+}
 
 // Rotas para unidades
 app.get('/api/units', authMiddleware, (req, res) => {
@@ -142,8 +158,22 @@ app.get('/api/healthcheck', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(port, () => {
-  console.log(`Servidor local rodando em http://localhost:${port}`);
+// Rota para obter o endereço do servidor
+app.get('/api/server-info', (req, res) => {
+  const localIP = getLocalIP();
+  res.json({
+    ip: localIP,
+    port: port,
+    url: `http://${localIP}:${port}`
+  });
+});
+
+const localIP = getLocalIP();
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Servidor central rodando em:`);
+  console.log(`- Local: http://localhost:${port}`);
+  console.log(`- Rede: http://${localIP}:${port}`);
+  console.log('\nOutros dispositivos podem se conectar usando o endereço da rede');
 });
 
 // Graceful shutdown

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ServerStatus } from './components/ServerStatus';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useThemeStore } from './store/useThemeStore';
 import Header from './components/Header';
@@ -147,6 +148,7 @@ function App() {
         </Routes>
         <LeadChatWrapper />
       </div>
+      <ServerStatus />
     </Router>
   );
 }
