@@ -1,82 +1,95 @@
-# KIHAP - Plataforma de Gestão para Academias de Artes Marciais
+# KIHAP - Sistema de Gestão
 
-O KIHAP é uma plataforma completa desenvolvida para modernizar e otimizar a gestão de academias de artes marciais. O nome "KIHAP" vem do grito de energia utilizado nas artes marciais coreanas, simbolizando força, determinação e foco - valores que nossa plataforma busca transmitir através de suas soluções tecnológicas.
+## Configuração do Servidor Central
 
-## 🎯 Visão Geral
+1. Clone o repositório
+```bash
+git clone [url-do-repositorio]
+cd kihap-main
+```
 
-A plataforma KIHAP foi criada para atender às necessidades específicas de academias de artes marciais, oferecendo ferramentas para:
+2. Instale as dependências do servidor
+```bash
+cd server
+npm install
+```
 
-- Gestão completa de alunos e turmas
-- Organização e controle de eventos
-- Sistema de graduações e faixas
-- Gestão de conteúdo online
-- CRM e captação de leads
-- Controle financeiro
-- Comunicação entre alunos e instrutores
+3. Inicie o servidor central
+```bash
+npm run dev
+```
 
-## 🌟 Principais Funcionalidades
+O servidor mostrará o endereço IP onde está rodando, por exemplo:
+```
+Servidor central rodando em:
+- Local: http://localhost:3000
+- Rede: http://192.168.15.5:3000
+```
 
-### Para Academias
-- **Gestão de Alunos**: Cadastro completo, histórico de graduações, frequência e evolução
-- **Gestão de Turmas**: Controle de horários, presença e planejamento de aulas
-- **CRM**: Sistema completo para gestão de leads e matrículas
-- **Eventos**: Organização e gestão de eventos, competições e graduações
-- **Financeiro**: Controle de mensalidades e pagamentos
+Anote o endereço IP da rede (no exemplo acima: 192.168.15.5), pois ele será necessário para configurar os clientes.
 
-### Para Alunos
-- **Portal do Aluno**: Acesso a informações de treinos e evolução
-- **Conteúdo Online**: Acesso a vídeo-aulas e material didático
-- **Checkin em Eventos**: Participação e acompanhamento de eventos
-- **Comunicação**: Chat direto com instrutores
+## Configuração dos Clientes
 
-### Para Instrutores
-- **Dashboard**: Visão geral das atividades e métricas da academia
-- **Gestão de Conteúdo**: Upload e organização de material didático
-- **Avaliações**: Sistema para registro e acompanhamento do progresso dos alunos
-- **Comunicação**: Sistema de notificações e chat com alunos
+Para cada computador que precisa acessar o sistema:
 
-## 🛠 Tecnologias Utilizadas
+1. Clone o repositório
+```bash
+git clone [url-do-repositorio]
+cd kihap-main
+```
 
-- **Frontend**: React, TypeScript, Tailwind CSS
-- **Backend**: tRPC, Node.js
-- **Banco de Dados**: Supabase
-- **Hospedagem**: Vercel
-- **Autenticação**: Supabase Auth
+2. Execute o script de configuração
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
-## 📱 Módulos do Sistema
+3. Quando solicitado, digite o IP do servidor central (anotado anteriormente)
 
-### 🎓 KIHAP Academy
-Módulo dedicado ao ensino e treinamento online, com:
-- Vídeo-aulas
-- Material didático
-- Avaliações online
-- Tracking de progresso
+4. Após a configuração, inicie o frontend
+```bash
+npm run serve
+```
 
-### 🎯 KIHAP Events
-Sistema completo para gestão de eventos:
-- Cadastro de participantes
-- Controle de presença
-- Certificados digitais
-- Resultados e rankings
+O frontend estará disponível em `http://localhost` e se conectará automaticamente ao servidor central.
 
-### 💼 KIHAP Business
-Ferramentas para gestão do negócio:
-- CRM completo
-- Controle financeiro
-- Relatórios e métricas
-- Marketing digital
+## Verificando a Conexão
 
-## 🤝 KIHAP em Ação
-Programa de responsabilidade social que leva artes marciais para comunidades carentes, promovendo:
-- Inclusão social
-- Desenvolvimento pessoal
-- Disciplina e respeito
-- Saúde e bem-estar
+- Em cada cliente, você verá um indicador de status no canto inferior direito da tela
+- Verde: conectado ao servidor central
+- Vermelho: desconectado do servidor
 
-## 📄 Licença
+## Solução de Problemas
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+1. Verifique se todos os dispositivos estão na mesma rede
+2. Certifique-se de que o servidor central está rodando
+3. Verifique se o endereço IP do servidor central está correto no arquivo .env
+4. Se necessário, configure o firewall para permitir conexões nas portas 3000 (servidor) e 80 (cliente)
 
----
+## Estrutura do Sistema
 
-Desenvolvido com 💪 pela equipe KIHAP
+- Servidor Central (porta 3000):
+  - Banco de dados SQLite
+  - API REST/tRPC
+  - Gerenciamento de dados
+
+- Clientes (porta 80):
+  - Interface web
+  - Conexão automática com o servidor
+  - Indicador de status de conexão
+
+## Desenvolvimento
+
+Para desenvolvimento local:
+```bash
+npm run dev
+```
+
+Para construir para produção:
+```bash
+npm run build
+```
+
+Para servir a versão de produção:
+```bash
+npm run serve
