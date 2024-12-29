@@ -7,13 +7,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-    // Otimizações para produção
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: false, // Mantém console.logs para debug
-      },
-    },
+    minify: 'esbuild', // Usa esbuild ao invés de terser
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   },
   // Configuração para desenvolvimento local
   server: {

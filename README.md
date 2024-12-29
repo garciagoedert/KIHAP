@@ -53,19 +53,6 @@ npm run serve
 
 O frontend estará disponível em `http://localhost` e se conectará automaticamente ao servidor central.
 
-## Verificando a Conexão
-
-- Em cada cliente, você verá um indicador de status no canto inferior direito da tela
-- Verde: conectado ao servidor central
-- Vermelho: desconectado do servidor
-
-## Solução de Problemas
-
-1. Verifique se todos os dispositivos estão na mesma rede
-2. Certifique-se de que o servidor central está rodando
-3. Verifique se o endereço IP do servidor central está correto no arquivo .env
-4. Se necessário, configure o firewall para permitir conexões nas portas 3000 (servidor) e 80 (cliente)
-
 ## Estrutura do Sistema
 
 - Servidor Central (porta 3000):
@@ -76,7 +63,13 @@ O frontend estará disponível em `http://localhost` e se conectará automaticam
 - Clientes (porta 80):
   - Interface web
   - Conexão automática com o servidor
-  - Indicador de status de conexão
+
+## Solução de Problemas
+
+1. Verifique se todos os dispositivos estão na mesma rede
+2. Certifique-se de que o servidor central está rodando
+3. Verifique se o endereço IP do servidor central está correto no arquivo .env
+4. Se necessário, configure o firewall para permitir conexões nas portas 3000 (servidor) e 80 (cliente)
 
 ## Desenvolvimento e Deploy
 
@@ -94,12 +87,19 @@ npm run serve
 ### Deploy no Vercel
 
 1. Conecte seu repositório ao Vercel
-2. Configure a variável de ambiente no Vercel:
+
+2. Configure as variáveis de ambiente no Vercel:
    - VITE_SERVER_URL: http://[IP-DO-SEU-SERVIDOR]:3000
+   - NODE_ENV: production
 
 3. O Vercel irá:
-   - Usar as configurações do vercel.json
+   - Usar esbuild para minificação (mais rápido e confiável)
    - Construir o frontend estático
    - Servir apenas o frontend
 
 4. O frontend no Vercel se conectará ao seu servidor central através do IP configurado
+
+Nota: Se o deploy falhar, verifique:
+- Se as variáveis de ambiente estão configuradas corretamente
+- Se o IP do servidor central está acessível
+- Se as portas necessárias estão liberadas no firewall
