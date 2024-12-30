@@ -1,38 +1,56 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-import type { KihapEvent } from '../types';
+import type { CreateEventParams } from '../types';
 
 interface EventFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (eventData: Omit<KihapEvent, 'id' | 'active' | 'createdAt' | 'updatedAt'>) => void;
+  onSubmit: (eventData: CreateEventParams) => void;
 }
 
 const EventForm: React.FC<EventFormProps> = ({ isOpen, onClose, onSubmit }) => {
   const { user } = useAuthStore();
   const [eventData, setEventData] = useState({
-    title: '',
+    name: '',
     description: '',
     date: '',
     location: '',
-    maxParticipants: 0
+    unitId: user?.unitId || ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.unitId) return;
+    if (!user) {
+      alert('Erro: Usuário não está logado');
+      return;
+    }
+    
+    if (!user.unitId) {
+      alert('Erro: Usuário não está associado a uma unidade');
+      return;
+    }
 
-    onSubmit({
-      ...eventData,
-      unitId: user.unitId,
-    });
+    console.log('Usuário:', user);
+    console.log('Dados do formulário:', eventData);
+    console.log('ID da unidade do usuário:', user.unitId);
+
+    const eventDataToSubmit = {
+      name: eventData.name,
+      description: eventData.description,
+      date: eventData.date,
+      location: eventData.location,
+      unitId: user.unitId // Usar diretamente o unitId do usuário
+    };
+
+    console.log('Dados a serem enviados:', eventDataToSubmit);
+    onSubmit(eventDataToSubmit);
 
     setEventData({
-      title: '',
+      name: '',
       description: '',
       date: '',
       location: '',
-      maxParticipants: 0
+      unitId: user?.unitId || ''
     });
   };
 
@@ -60,8 +78,8 @@ const EventForm: React.FC<EventFormProps> = ({ isOpen, onClose, onSubmit }) => {
             <input
               id="event-title"
               type="text"
-              value={eventData.title}
-              onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
+              value={eventData.name}
+              onChange={(e) => setEventData({ ...eventData, name: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
               placeholder="Digite o nome do evento"
               required
@@ -108,22 +126,6 @@ const EventForm: React.FC<EventFormProps> = ({ isOpen, onClose, onSubmit }) => {
               onChange={(e) => setEventData({ ...eventData, location: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
               placeholder="Digite o local do evento"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="event-max-participants" className="block text-sm font-medium text-gray-700 mb-1">
-              Número Máximo de Participantes
-            </label>
-            <input
-              id="event-max-participants"
-              type="number"
-              min="0"
-              value={eventData.maxParticipants}
-              onChange={(e) => setEventData({ ...eventData, maxParticipants: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              placeholder="Digite o número máximo de participantes"
               required
             />
           </div>

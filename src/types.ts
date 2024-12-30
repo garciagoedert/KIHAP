@@ -37,16 +37,7 @@ export interface Student {
   contract?: string;
   favoriteContent?: string[];
   completedContent?: string[];
-}
-
-export interface Instructor {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  unitId: string;
-  belt?: string;
-  commissionRate?: number;
+  userId?: string;
 }
 
 export interface Unit {
@@ -70,21 +61,38 @@ export interface SubUnit {
   email?: string;
 }
 
-export type LeadStatus = 'novo' | 'contato' | 'visitou' | 'matriculado' | 'desistente';
-
-export interface Lead {
+export interface KihapEvent {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  status: LeadStatus;
-  source: string;
-  notes?: string;
+  description: string | null;
+  date: string;
+  location: string;
+  unitId: string;
+  active: boolean;
+  status?: 'active' | 'cancelled' | 'completed';
+  maxParticipants?: number;
   createdAt: string;
-  unitId?: string;
-  history?: LeadHistory[];
-  value?: number;
+  updatedAt: string;
 }
+
+export interface EventCheckin {
+  id: string;
+  eventId: string;
+  studentId: string;
+  checkinTime: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EventCheckinWithDetails extends EventCheckin {
+  studentName: string;
+  studentBelt: string;
+  eventName: string;
+  eventDate: string;
+  eventLocation: string;
+}
+
+export type LeadStatus = 'novo' | 'contato' | 'visitou' | 'matriculado' | 'desistente';
 
 export interface LeadHistory {
   id: string;
@@ -95,7 +103,25 @@ export interface LeadHistory {
   type: 'status_change' | 'note' | 'contact';
   oldStatus?: LeadStatus;
   newStatus?: LeadStatus;
-  description?: string;
+}
+
+export interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  source: string;
+  unitId: string;
+  subUnitId?: string;
+  notes?: string;
+  value?: number;
+  status: LeadStatus;
+  createdAt: string;
+  history?: LeadHistory[];
+  priority?: 'baixa' | 'media' | 'alta';
+  nextContactDate?: string;
+  lastContactDate?: string;
+  tags?: string[];
 }
 
 export interface Task {
@@ -109,16 +135,6 @@ export interface Task {
   createdAt: string;
   completedAt?: string;
   createdBy: number;
-}
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'warning' | 'error';
-  createdAt: string;
-  userId: string;
-  read: boolean;
 }
 
 export interface OnlineContent {
@@ -140,43 +156,6 @@ export interface OnlineContent {
   tags?: string[];
 }
 
-export interface LiveClass {
-  id: string;
-  title: string;
-  description: string;
-  instructorId: string;
-  startTime: string;
-  duration: number;
-  maxParticipants: number;
-  status?: string;
-  targetStudentIds?: string[];
-  targetBelts?: string[];
-  unitId?: string;
-  scheduledFor?: string;
-}
-
-export interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  criteria: string;
-  category?: string;
-  beltLevel?: string;
-  color?: string;
-  icon?: string;
-  type?: string;
-  image?: string;
-}
-
-export interface StudentBadge {
-  id: string;
-  studentId: string;
-  badgeId: string;
-  awardedAt: string;
-  awardedBy?: string;
-}
-
 export interface PhysicalTest {
   id: string;
   studentId: string;
@@ -186,78 +165,106 @@ export interface PhysicalTest {
   notes?: string;
 }
 
-export interface Store {
-  id: string;
+// Tipos para parâmetros de funções
+export interface CreateEventParams {
   name: string;
-  unitId: string;
-  city?: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  imageUrl?: string;
-  stock: number;
-  storeId?: string;
-  image?: string;
-  active?: boolean;
-}
-
-export interface Sale {
-  id: string;
-  productId: string;
-  studentId: string;
-  quantity: number;
-  totalPrice: number;
-  date: string;
-  product?: Product;
-  student?: Student;
-  price?: number;
-  status?: string;
-  createdAt?: string;
-}
-
-export interface Commission {
-  id: string;
-  saleId: string;
-  instructorId: string;
-  amount: number;
-  status: 'pending' | 'paid';
-  instructor?: Instructor;
-  sale?: Sale;
-  createdAt?: string;
-}
-
-export interface KihapEvent {
-  id: string;
-  title: string;
-  description: string;
+  description?: string;
   date: string;
   location: string;
-  maxParticipants: number;
   unitId: string;
-  name?: string;
-  active?: boolean;
-  status?: 'active' | 'cancelled' | 'completed';
 }
 
-export interface EventCheckin {
-  id: string;
+export interface CreateCheckinParams {
   eventId: string;
   studentId: string;
   checkinTime: string;
 }
 
-export interface Class {
+// Enums úteis
+export enum UserRole {
+  Student = 'student',
+  Instructor = 'instructor',
+  Admin = 'admin'
+}
+
+export enum BeltRank {
+  White = 'white',
+  Yellow = 'yellow',
+  Green = 'green',
+  Blue = 'blue',
+  Red = 'red',
+  Black = 'black'
+}
+
+// Tipos para badges
+export interface Badge {
   id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  criteria: string;
+  category: string;
+  type: string;
+  beltLevel?: string;
+  color: string;
+  icon: string;
+}
+
+export interface StudentBadge {
+  id: string;
+  studentId: string;
+  badgeId: string;
+  awardedAt: string;
+}
+
+// Tipos para aulas ao vivo
+export interface LiveClass {
+  id: string;
+  title: string;
+  description: string;
+  instructorId: string;
   startTime: string;
-  endTime: string;
-  type: 'ADULTO' | 'KIDS' | 'BABY LITTLE' | 'LITTLE' | 'FAIXA PRETA' | 'SPARRING';
-  instructor: string;
-  capacity: number;
-  enrolled: number;
-  subUnit?: string;
+  duration: number;
+  maxParticipants: number;
+  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  scheduledFor: string;
+}
+
+// Tipos para notificações
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  read: boolean;
+  createdAt: string;
+}
+
+// Tipos para erros
+export interface ApiError extends Error {
+  code?: string;
+  details?: string;
+}
+
+// Tipos para criação/atualização de leads
+export interface CreateLeadInput {
+  name: string;
+  email: string;
+  phone: string;
+  source: string;
+  unitId: string;
+  subUnitId?: string;
+  notes?: string;
+  value?: number;
+  status?: LeadStatus;
+}
+
+export interface UpdateLeadInput extends Partial<CreateLeadInput> {
+  id: string;
+  history?: LeadHistory[];
+  nextContactDate?: string;
+  lastContactDate?: string;
+  priority?: 'baixa' | 'media' | 'alta';
+  tags?: string[];
 }

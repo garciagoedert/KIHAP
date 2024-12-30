@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useDataStore } from '../store/useDataStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
-import { Lead, LeadStatus, LeadHistory } from '../types/supabase';
+import { Lead, LeadStatus, LeadHistory } from '../types';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { FiSearch, FiTrash2, FiPhone, FiMail, FiMessageSquare, FiUsers, FiEdit, FiFilter, FiTag, FiClock, FiAlertCircle, FiCalendar, FiUserPlus } from 'react-icons/fi';
-import { X } from 'lucide-react';
+import { X, MapPin } from 'lucide-react';
 import { format, isAfter, isBefore, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import LeadDetailsModal from './LeadDetailsModal';
@@ -73,10 +73,13 @@ interface ExtendedLead extends Lead {
   nextContactDate?: string;
   lastContactDate?: string;
   tags?: string[];
+  history?: LeadHistory[];
+  createdAt: string;
+  subUnitId?: string;
 }
 
 export default function CRMBoard() {
-  const { leads, updateLead, deleteLead, fetchLeads, addLead } = useDataStore();
+  const { leads, units, subunits, updateLead, deleteLead, fetchLeads, addLead } = useDataStore();
   const { user } = useAuthStore();
   const isDarkMode = useThemeStore(state => state.isDarkMode);
   const [selectedLead, setSelectedLead] = useState<ExtendedLead | null>(null);
@@ -150,7 +153,7 @@ export default function CRMBoard() {
         await updateLead({
           ...lead,
           status: newStatus,
-          history: [...(lead.history || []), newHistoryItem]
+          history: [...((lead as ExtendedLead).history || []), newHistoryItem]
         });
       } catch (error) {
         console.error('Erro ao atualizar lead:', error);
@@ -448,6 +451,17 @@ export default function CRMBoard() {
                                       } transition-colors`}>
                                         <FiPhone className="mr-2" size={14} />
                                         <span className="text-sm">{lead.phone}</span>
+                                      </div>
+                                      <div className={`flex items-center ${
+                                        isDarkMode
+                                          ? 'text-gray-300 group-hover:text-blue-400'
+                                          : 'text-gray-600 group-hover:text-blue-600'
+                                      } transition-colors`}>
+                                        <MapPin className="mr-2" size={14} />
+                                        <span className="text-sm">
+                                          {units.find(u => u.id === lead.unitId)?.name}
+                                          {extendedLead.subUnitId && ` - ${subunits.find(s => s.id === extendedLead.subUnitId)?.name}`}
+                                        </span>
                                       </div>
                                       {lead.notes && (
                                         <div className={`flex items-start ${

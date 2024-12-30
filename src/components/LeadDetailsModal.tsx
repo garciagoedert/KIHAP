@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { X, Calendar, Phone, Mail, DollarSign, Clock, Plus, Tag, AlertCircle } from 'lucide-react';
-import { Lead, LeadHistory, LeadStatus } from '../types/supabase';
+import { X, Calendar, Phone, Mail, DollarSign, Clock, Plus, Tag, AlertCircle, MapPin } from 'lucide-react';
+import { Lead, LeadHistory, LeadStatus } from '../types';
 import { useDataStore } from '../store/useDataStore';
 import { useThemeStore } from '../store/useThemeStore';
 
@@ -35,7 +35,7 @@ const statusColors: Record<LeadStatus, string> = {
 };
 
 export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsModalProps) {
-  const { updateLead } = useDataStore();
+  const { updateLead, units, subunits } = useDataStore();
   const isDarkMode = useThemeStore(state => state.isDarkMode);
   const [note, setNote] = useState('');
   const [contact, setContact] = useState('');
@@ -241,6 +241,40 @@ export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsM
                   placeholder="Valor"
                   aria-label="Valor do lead"
                 />
+                <select
+                  value={editedLead.unitId}
+                  onChange={(e) => setEditedLead({ 
+                    ...editedLead, 
+                    unitId: e.target.value,
+                    subUnitId: '' // Limpa a subunidade quando muda a unidade
+                  })}
+                  className="w-full p-2 border rounded"
+                  aria-label="Unidade"
+                >
+                  <option value="">Selecione uma unidade</option>
+                  {units.map((unit) => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.name}
+                    </option>
+                  ))}
+                </select>
+                {editedLead.unitId && (
+                  <select
+                    value={editedLead.subUnitId || ''}
+                    onChange={(e) => setEditedLead({ ...editedLead, subUnitId: e.target.value })}
+                    className="w-full p-2 border rounded"
+                    aria-label="Local de Treino"
+                  >
+                    <option value="">Selecione um local</option>
+                    {subunits
+                      .filter(s => s.unitId === editedLead.unitId)
+                      .map((subunit) => (
+                        <option key={subunit.id} value={subunit.id}>
+                          {subunit.name}
+                        </option>
+                      ))}
+                  </select>
+                )}
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setIsEditing(false)}
@@ -275,6 +309,13 @@ export default function LeadDetailsModal({ lead, onClose, userId }: LeadDetailsM
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="flex items-center gap-2 col-span-2">
+                    <MapPin size={20} className="text-gray-400" />
+                    <span>
+                      {units.find(u => u.id === lead.unitId)?.name}
+                      {lead.subUnitId && ` - ${subunits.find(s => s.id === lead.subUnitId)?.name}`}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Phone size={20} className="text-gray-400" />
                     <span>{lead.phone}</span>

@@ -9,7 +9,7 @@ import type {
   Student,
   Lead,
   ApiError
-} from '../src/types/supabase';
+} from '../src/types';
 
 // Inicialização do tRPC
 const t = initTRPC.create();
@@ -25,12 +25,12 @@ const eventSchema = z.object({
   description: z.string().optional(),
   date: z.string().datetime(),
   location: z.string().min(1, 'Localização é obrigatória'),
-  unit_id: z.string().uuid()
+  unitId: z.string().uuid()
 });
 
 const checkinSchema = z.object({
-  event_id: z.string().uuid(),
-  student_id: z.string().uuid()
+  eventId: z.string().uuid(),
+  studentId: z.string().uuid()
 });
 
 const leadSchema = z.object({
@@ -45,12 +45,24 @@ const leadSchema = z.object({
 });
 
 // Função auxiliar para verificar se um aluno pode fazer checkin
+interface DbEvent {
+  id: string;
+  name: string;
+  description: string | null;
+  date: string;
+  location: string;
+  unitId: string;
+  active: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
 function canStudentCheckin(eventId: string, studentId: string): boolean {
-  const event = db.prepare('SELECT date FROM kihap_events WHERE id = ?').get(eventId);
+  const event = db.prepare('SELECT date FROM kihap_events WHERE id = ?').get(eventId) as DbEvent | undefined;
   if (!event) return false;
 
   const hasCheckin = db.prepare(
-    'SELECT 1 FROM event_checkins WHERE event_id = ? AND student_id = ?'
+    'SELECT 1 FROM event_checkins WHERE eventId = ? AND studentId = ?'
   ).get(eventId, studentId);
   if (hasCheckin) return false;
 
@@ -65,17 +77,17 @@ function canStudentCheckin(eventId: string, studentId: string): boolean {
 const appRouter = router({
   // Leads
   getLeads: publicProcedure.query(() => {
-    return db.prepare('SELECT * FROM leads ORDER BY created_at DESC').all() as Lead[];
+    return db.prepare('SELECT * FROM leads ORDER BY createdAt DESC').all() as Lead[];
   }),
 
   createLead: publicProcedure
     .input(leadSchema)
     .mutation(({ input }) => {
       const id = uuidv4();
-      const created_at = new Date().toISOString();
+      const createdAt = new Date().toISOString();
       
       db.prepare(`
-        INSERT INTO leads (id, name, email, phone, source, unitId, notes, value, status, created_at, history)
+        INSERT INTO leads (id, name, email, phone, source, unitId, notes, value, status, createdAt, history)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         id,
@@ -87,7 +99,7 @@ const appRouter = router({
         input.notes,
         input.value,
         input.status,
-        created_at,
+        createdAt,
         '[]'
       );
 
@@ -132,23 +144,34 @@ const appRouter = router({
   createEvent: publicProcedure
     .input(eventSchema)
     .mutation(({ input }) => {
-      const id = uuidv4();
-      const created_at = new Date().toISOString();
-      
-      db.prepare(`
-        INSERT INTO kihap_events (id, name, description, date, location, unit_id, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        id,
-        input.name,
-        input.description,
-        input.date,
-        input.location,
-        input.unit_id,
-        created_at
-      );
+      // Verifica se a unidade existe
+      const unit = db.prepare('SELECT id FROM units WHERE id = ?').get(input.unitId);
+      if (!unit) {
+        throw new Error(`Unidade com ID ${input.unitId} não encontrada. Por favor, verifique se a unidade existe.`);
+      }
 
-      return db.prepare('SELECT * FROM kihap_events WHERE id = ?').get(id) as KihapEvent;
+      const id = uuidv4();
+      const createdAt = new Date().toISOString();
+      
+      try {
+        db.prepare(`
+          INSERT INTO kihap_events (id, name, description, date, location, unitId, createdAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          id,
+          input.name,
+          input.description,
+          input.date,
+          input.location,
+          input.unitId,
+          createdAt
+        );
+
+        return db.prepare('SELECT * FROM kihap_events WHERE id = ?').get(id) as KihapEvent;
+      } catch (error) {
+        console.error('Erro ao criar evento:', error);
+        throw new Error(`Erro ao criar evento: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      }
     }),
 
   updateEvent: publicProcedure
@@ -164,9 +187,9 @@ const appRouter = router({
 
       db.prepare(`
         UPDATE kihap_events
-        SET ${setClause}, updated_at = @updated_at
+        SET ${setClause}, updatedAt = @updatedAt
         WHERE id = @id
-      `).run({ ...updateData, id, updated_at: new Date().toISOString() });
+      `).run({ ...updateData, id, updatedAt: new Date().toISOString() });
 
       return db.prepare('SELECT * FROM kihap_events WHERE id = ?').get(id) as KihapEvent;
     }),
@@ -176,24 +199,24 @@ const appRouter = router({
     .input(z.string().uuid())
     .query(({ input }) => {
       return db.prepare(
-        'SELECT * FROM event_checkins_with_details WHERE event_id = ?'
+        'SELECT * FROM event_checkins_with_details WHERE eventId = ?'
       ).all(input);
     }),
 
   createCheckin: publicProcedure
     .input(checkinSchema)
     .mutation(({ input }) => {
-      if (!canStudentCheckin(input.event_id, input.student_id)) {
+      if (!canStudentCheckin(input.eventId, input.studentId)) {
         throw new Error('Checkin não permitido neste momento');
       }
 
       const id = uuidv4();
-      const checkin_time = new Date().toISOString();
+      const checkinTime = new Date().toISOString();
       
       db.prepare(`
-        INSERT INTO event_checkins (id, event_id, student_id, checkin_time)
+        INSERT INTO event_checkins (id, eventId, studentId, checkinTime)
         VALUES (?, ?, ?, ?)
-      `).run(id, input.event_id, input.student_id, checkin_time);
+      `).run(id, input.eventId, input.studentId, checkinTime);
 
       return db.prepare('SELECT * FROM event_checkins WHERE id = ?').get(id) as EventCheckin;
     }),

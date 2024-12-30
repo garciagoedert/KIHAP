@@ -13,12 +13,10 @@ import type {
   StudentBadge,
   LiveClass,
   Notification,
-  PhysicalTest
-} from '../types';
-import type {
+  PhysicalTest,
   CreateLeadInput,
   UpdateLeadInput
-} from '../types/supabase';
+} from '../types';
 import { initialUnits, initialUsers, beltBadges, initialOnlineContent, initialLiveClasses, initialStudents } from '../data';
 import { trpc } from '../lib/trpc';
 
@@ -103,6 +101,10 @@ const initialSubunits = initialUnits.reduce((acc: SubUnit[], unit) => {
   }
   return acc;
 }, []);
+
+// Log para debug
+console.log('Initial Units:', JSON.stringify(initialUnits, null, 2));
+console.log('Initial Subunits:', JSON.stringify(initialSubunits, null, 2));
 
 export const useDataStore = createStore<DataState>()((set) => ({
   units: initialUnits,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDataStore } from '../store/useDataStore';
-import { CreateLeadInput } from '../types/supabase';
+import { CreateLeadInput } from '../types';
 
 interface LeadFormProps {
   onSubmit: (lead: CreateLeadInput) => Promise<void>;
@@ -9,17 +9,28 @@ interface LeadFormProps {
 }
 
 export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experimental", darkMode = false }: LeadFormProps) {
-  const { units } = useDataStore();
+  const { units, subunits } = useDataStore();
   const [formData, setFormData] = useState<CreateLeadInput>({
     name: '',
     email: '',
     phone: '',
     source: 'form',
     unitId: units[0]?.id || '',
+    subUnitId: '',
     notes: '',
     value: 0,
     status: 'novo'
   });
+
+  // Log para debug
+  console.log('Units:', JSON.stringify(units, null, 2));
+  console.log('Subunits:', JSON.stringify(subunits, null, 2));
+  console.log('Form Data:', JSON.stringify(formData, null, 2));
+
+  const availableSubunits = subunits.filter(
+    (subunit) => subunit.unitId === formData.unitId
+  );
+  console.log('Available Subunits:', JSON.stringify(availableSubunits, null, 2));
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +118,11 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
         <select
           id="unit"
           value={formData.unitId}
-          onChange={(e) => setFormData({ ...formData, unitId: e.target.value })}
+          onChange={(e) => setFormData({ 
+            ...formData, 
+            unitId: e.target.value,
+            subUnitId: '' // Limpa a subunidade quando muda a unidade
+          })}
           className={inputClasses}
           required
           disabled={isSubmitting}
@@ -120,6 +135,29 @@ export default function LeadForm({ onSubmit, buttonText = "Agendar Aula Experime
           ))}
         </select>
       </div>
+
+      {formData.unitId && availableSubunits.length > 0 && (
+        <div>
+          <label htmlFor="subunit" className={labelClasses}>
+            Local de Treino
+          </label>
+          <select
+            id="subunit"
+            value={formData.subUnitId}
+            onChange={(e) => setFormData({ ...formData, subUnitId: e.target.value })}
+            className={inputClasses}
+            required
+            disabled={isSubmitting}
+          >
+            <option value="">Selecione um local</option>
+            {availableSubunits.map((subunit) => (
+              <option key={subunit.id} value={subunit.id}>
+                {subunit.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label htmlFor="notes" className={labelClasses}>

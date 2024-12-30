@@ -1,24 +1,31 @@
 import express from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
-import Database from 'better-sqlite3';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import os from 'os';
+import mongoose from 'mongoose';
+import {
+  Unit,
+  Subunit,
+  User,
+  Student,
+  KihapEvent,
+  EventCheckin,
+  Lead
+} from './models.js';
 
 config(); // Load environment variables
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Inicializa o banco de dados SQLite
-const db = new Database('database.sqlite');
-
-// Carrega e executa o schema SQL
-const schema = fs.readFileSync(join(__dirname, 'schema.sql'), 'utf8');
-db.exec(schema);
+// Conecta ao MongoDB
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/kihap';
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Conectado ao MongoDB'))
+  .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 
 const app = express();
 const port = 3000;
@@ -52,102 +59,144 @@ function getLocalIP() {
   return 'localhost';
 }
 
+// Inicializa a unidade padrão se não existir
+async function initializeDefaultUnit() {
+  try {
+    const defaultUnit = await Unit.findById('1');
+    if (!defaultUnit) {
+      console.log('Criando unidade padrão...');
+      await Unit.create({
+        _id: '1',
+        name: 'Kihap Florianópolis'
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao criar unidade padrão:', error);
+  }
+}
+initializeDefaultUnit();
+
 // Rotas para unidades
-app.get('/api/units', authMiddleware, (req, res) => {
-  const units = db.prepare('SELECT * FROM units').all();
-  res.json(units);
+app.get('/api/units', authMiddleware, async (req, res) => {
+  try {
+    const units = await Unit.find();
+    res.json(units);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.post('/api/units', authMiddleware, (req, res) => {
-  const { name } = req.body;
-  const id = uuidv4();
-  
+app.post('/api/units', authMiddleware, async (req, res) => {
   try {
-    db.prepare('INSERT INTO units (id, name) VALUES (?, ?)').run(id, name);
-    res.json({ id, name });
+    const { name } = req.body;
+    const unit = await Unit.create({
+      _id: uuidv4(),
+      name
+    });
+    res.json(unit);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // Rotas para eventos
-app.get('/api/events', authMiddleware, (req, res) => {
-  const events = db.prepare('SELECT * FROM kihap_events WHERE active = 1').all();
-  res.json(events);
+app.get('/api/events', authMiddleware, async (req, res) => {
+  try {
+    const events = await KihapEvent.find({ active: true });
+    res.json(events);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.post('/api/events', authMiddleware, (req, res) => {
-  const { name, description, date, location, unit_id } = req.body;
-  const id = uuidv4();
-  
+app.post('/api/events', authMiddleware, async (req, res) => {
   try {
-    db.prepare(`
-      INSERT INTO kihap_events (id, name, description, date, location, unit_id)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, name, description, date, location, unit_id);
-    
-    res.json({ id, name, description, date, location, unit_id });
+    const { name, description, date, location, unitId } = req.body;
+    const event = await KihapEvent.create({
+      _id: uuidv4(),
+      name,
+      description,
+      date,
+      location,
+      unitId
+    });
+    res.json(event);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // Rotas para checkins
-app.get('/api/checkins', authMiddleware, (req, res) => {
-  const checkins = db.prepare('SELECT * FROM event_checkins_with_details').all();
-  res.json(checkins);
+app.get('/api/checkins', authMiddleware, async (req, res) => {
+  try {
+    const checkins = await EventCheckin.find()
+      .populate('studentId', 'name belt')
+      .populate('eventId', 'name date location');
+    res.json(checkins);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.post('/api/checkins', authMiddleware, (req, res) => {
-  const { event_id, student_id } = req.body;
-  const id = uuidv4();
-  const checkin_time = new Date().toISOString();
-  
+app.post('/api/checkins', authMiddleware, async (req, res) => {
   try {
-    db.prepare(`
-      INSERT INTO event_checkins (id, event_id, student_id, checkin_time)
-      VALUES (?, ?, ?, ?)
-    `).run(id, event_id, student_id, checkin_time);
-    
-    res.json({ id, event_id, student_id, checkin_time });
+    const { eventId, studentId } = req.body;
+    const checkin = await EventCheckin.create({
+      _id: uuidv4(),
+      eventId,
+      studentId,
+      checkinTime: new Date()
+    });
+    res.json(checkin);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // Rotas para usuários
-app.get('/api/users', authMiddleware, (req, res) => {
-  const users = db.prepare('SELECT * FROM users').all();
-  res.json(users);
+app.get('/api/users', authMiddleware, async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.post('/api/users', authMiddleware, (req, res) => {
-  const { email, role } = req.body;
-  const id = uuidv4();
-  
+app.post('/api/users', authMiddleware, async (req, res) => {
   try {
-    db.prepare('INSERT INTO users (id, email, role) VALUES (?, ?, ?)')
-      .run(id, email, role);
-    res.json({ id, email, role });
+    const { email, role } = req.body;
+    const user = await User.create({
+      _id: uuidv4(),
+      email,
+      role
+    });
+    res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // Rotas para estudantes
-app.get('/api/students', authMiddleware, (req, res) => {
-  const students = db.prepare('SELECT * FROM students').all();
-  res.json(students);
+app.get('/api/students', authMiddleware, async (req, res) => {
+  try {
+    const students = await Student.find();
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.post('/api/students', authMiddleware, (req, res) => {
-  const { user_id, name, belt } = req.body;
-  const id = uuidv4();
-  
+app.post('/api/students', authMiddleware, async (req, res) => {
   try {
-    db.prepare('INSERT INTO students (id, user_id, name, belt) VALUES (?, ?, ?, ?)')
-      .run(id, user_id, name, belt);
-    res.json({ id, user_id, name, belt });
+    const { userId, name, belt } = req.body;
+    const student = await Student.create({
+      _id: uuidv4(),
+      userId,
+      name,
+      belt
+    });
+    res.json(student);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -177,8 +226,8 @@ app.listen(port, '0.0.0.0', () => {
 });
 
 // Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('Fechando conexão com o banco de dados...');
-  db.close();
+process.on('SIGINT', async () => {
+  console.log('Fechando conexão com o MongoDB...');
+  await mongoose.connection.close();
   process.exit(0);
 });
